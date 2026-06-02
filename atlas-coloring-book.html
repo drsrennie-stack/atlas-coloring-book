@@ -130,9 +130,19 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-vis
     linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   background-size: 24px 24px;
 }
-/* Stylus-only mode lets the browser handle pinch-zoom with fingers; pencil still draws */
-.canvas-wrap.stylus-only { touch-action: pinch-zoom; }
-.canvas-wrap.stylus-only .draw-canvas { touch-action: pinch-zoom; }
+/* Stylus-only mode: pencil draws, finger does NOT draw. Pinch/pan handled by custom JS. */
+.canvas-wrap { touch-action: none; }
+/* Pinch-zoom + pan apply through CSS variables, set by JS in real time. */
+.canvas-wrap { --acb-zoom: 1; --acb-pan-x: 0px; --acb-pan-y: 0px; }
+.pane-zoom-content { position: absolute; inset: 0; transform-origin: 0 0; transform: translate(var(--acb-pan-x), var(--acb-pan-y)) scale(var(--acb-zoom)); will-change: transform; }
+.pane-zoom-content.is-animating { transition: transform 240ms ease-out; }
+
+.zoom-indicator { position: absolute; left: 12px; bottom: 12px; background: rgba(11, 21, 48, 0.86); color: #FAFAF9; font-size: 10.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; border: none; cursor: pointer; z-index: 5; font-family: inherit; opacity: 0; transition: opacity 180ms ease; display: inline-flex; align-items: center; gap: 8px; }
+.zoom-indicator::after { content: "Reset"; font-weight: 700; opacity: 0.7; letter-spacing: 0.10em; }
+.zoom-indicator.is-visible { opacity: 1; }
+.zoom-indicator:hover, .zoom-indicator:focus-visible { background: #0B1530; }
+.canvas-wrap.is-dark .zoom-indicator { background: rgba(250, 250, 249, 0.92); color: #0B1530; }
+.canvas-wrap.is-dark .zoom-indicator:hover { background: #FAFAF9; }
 
 /* Pane structure: in single mode, panes overlap and only one is visible at a time.
    In side-by-side mode, panes split the wrap 50/50 (or stack vertically on narrow screens). */
@@ -448,15 +458,20 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     <div class="canvas-col" data-slide-title="atlas-labeling-practice">
       <div class="canvas-wrap is-grid" id="canvasWrap">
         <div class="canvas-pane pane-practice" id="panePractice">
-          <img class="canvas-image is-hidden" id="practiceImg" alt="" aria-hidden="true">
-          <canvas class="draw-canvas" id="drawCanvas" role="img" aria-label="Labeling canvas"></canvas>
+          <div class="pane-zoom-content">
+            <img class="canvas-image is-hidden" id="practiceImg" alt="" aria-hidden="true">
+            <canvas class="draw-canvas" id="drawCanvas" role="img" aria-label="Labeling canvas"></canvas>
+          </div>
           <span class="pane-label" aria-hidden="true">Practice</span>
         </div>
         <div class="canvas-pane pane-key" id="paneKey">
-          <img class="canvas-image is-hidden" id="keyImg" alt="" aria-hidden="true">
+          <div class="pane-zoom-content">
+            <img class="canvas-image is-hidden" id="keyImg" alt="" aria-hidden="true">
+          </div>
           <span class="pane-label is-key" aria-hidden="true">Answer key</span>
         </div>
         <span class="stylus-badge" id="stylusBadge" aria-hidden="true">Stylus only</span>
+        <button type="button" class="zoom-indicator" id="zoomIndicator" aria-label="Current zoom level. Tap to reset to 100%.">100%</button>
         <div class="canvas-empty" id="canvasEmpty" aria-hidden="true">
           <span class="canvas-empty-title">No image loaded yet</span>
           <span class="canvas-empty-sub">Drop an unlabeled atlas image above to start labeling. The canvas works without an image too, if you just want a blank scratch space.</span>

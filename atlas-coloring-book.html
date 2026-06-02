@@ -133,6 +133,34 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-vis
 /* Stylus-only mode lets the browser handle pinch-zoom with fingers; pencil still draws */
 .canvas-wrap.stylus-only { touch-action: pinch-zoom; }
 .canvas-wrap.stylus-only .draw-canvas { touch-action: pinch-zoom; }
+
+/* Pane structure: in single mode, panes overlap and only one is visible at a time.
+   In side-by-side mode, panes split the wrap 50/50 (or stack vertically on narrow screens). */
+.canvas-pane { position: absolute; inset: 0; overflow: hidden; }
+.pane-label { position: absolute; left: 10px; top: 10px; padding: 3px 9px; font-size: 9.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; background: rgba(11, 21, 48, 0.86); color: #FAFAF9; border-radius: 999px; pointer-events: none; z-index: 3; opacity: 0; transition: opacity 180ms ease; }
+.pane-label.is-key { background: rgba(139, 58, 46, 0.92); }
+.canvas-wrap.is-dark .pane-label { background: rgba(250, 250, 249, 0.92); color: #0B1530; }
+.canvas-wrap.is-dark .pane-label.is-key { background: rgba(201, 161, 74, 0.95); color: #0B1530; }
+
+.canvas-wrap.is-split { display: flex; flex-direction: row; gap: 2px; }
+.canvas-wrap.is-split .canvas-pane { position: relative; inset: auto; flex: 1 1 0; min-width: 0; min-height: 0; }
+.canvas-wrap.is-split .pane-practice { border-right: 2px solid rgba(11, 21, 48, 0.18); }
+.canvas-wrap.is-split.is-dark .pane-practice { border-right-color: rgba(250, 250, 249, 0.18); }
+.canvas-wrap.is-split .pane-label { opacity: 1; }
+/* In split mode the key image is always visible (regardless of Show Key toggle) */
+.canvas-wrap.is-split .pane-key .canvas-image { opacity: 1 !important; }
+/* When the user has no key loaded yet but split mode is on, show a hint in the key pane */
+.canvas-wrap.is-split .pane-key:empty::before { content: "No answer key loaded yet"; }
+.canvas-wrap.is-split .pane-key::after { content: ""; }
+
+.action-btn.split-toggle.is-active { background: #C9A14A; color: #0B1530; border-color: #C9A14A; font-weight: 800; }
+.action-btn.split-toggle.is-active:hover { background: #B8924A; border-color: #B8924A; color: #0B1530; }
+
+@media (max-width: 760px) {
+  .canvas-wrap.is-split { flex-direction: column; }
+  .canvas-wrap.is-split .pane-practice { border-right: none; border-bottom: 2px solid rgba(11, 21, 48, 0.18); }
+  .canvas-wrap.is-split.is-dark .pane-practice { border-bottom-color: rgba(250, 250, 249, 0.18); }
+}
 .stylus-badge { position: absolute; top: 10px; right: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(11, 21, 48, 0.86); color: #FAFAF9; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; border-radius: 999px; pointer-events: none; z-index: 4; }
 .stylus-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #C9A14A; }
 .canvas-wrap.is-dark .stylus-badge { background: rgba(250, 250, 249, 0.92); color: #0B1530; }
@@ -395,6 +423,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
 
       <div class="tool-group" aria-label="Answer key">
         <button type="button" class="action-btn key-toggle" id="keyToggleBtn" aria-pressed="false" disabled>Show key<span class="kbd">K</span></button>
+        <button type="button" class="action-btn split-toggle" id="splitToggleBtn" aria-pressed="false" disabled title="Show practice and answer key side by side. Drawing stays on the practice (left) pane.">Side by side<span class="kbd">V</span></button>
       </div>
 
       <div class="tool-group" aria-label="Coloring book">
@@ -418,9 +447,15 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
 
     <div class="canvas-col" data-slide-title="atlas-labeling-practice">
       <div class="canvas-wrap is-grid" id="canvasWrap">
-        <img class="canvas-image is-hidden" id="practiceImg" alt="" aria-hidden="true">
-        <img class="canvas-image is-hidden" id="keyImg" alt="" aria-hidden="true">
-        <canvas class="draw-canvas" id="drawCanvas" role="img" aria-label="Labeling canvas"></canvas>
+        <div class="canvas-pane pane-practice" id="panePractice">
+          <img class="canvas-image is-hidden" id="practiceImg" alt="" aria-hidden="true">
+          <canvas class="draw-canvas" id="drawCanvas" role="img" aria-label="Labeling canvas"></canvas>
+          <span class="pane-label" aria-hidden="true">Practice</span>
+        </div>
+        <div class="canvas-pane pane-key" id="paneKey">
+          <img class="canvas-image is-hidden" id="keyImg" alt="" aria-hidden="true">
+          <span class="pane-label is-key" aria-hidden="true">Answer key</span>
+        </div>
         <span class="stylus-badge" id="stylusBadge" aria-hidden="true">Stylus only</span>
         <div class="canvas-empty" id="canvasEmpty" aria-hidden="true">
           <span class="canvas-empty-title">No image loaded yet</span>
@@ -442,6 +477,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       <div class="kb-row"><span class="kb-key">1</span>&ndash;<span class="kb-key">9</span>&nbsp;<span class="kb-key">0</span><span>Pick pen color (white = click only)</span></div>
       <div class="kb-row"><span class="kb-key">[</span>&nbsp;<span class="kb-key">]</span><span>Pen smaller / bigger</span></div>
       <div class="kb-row"><span class="kb-key">S</span><span>Save annotated PNG</span></div>
+      <div class="kb-row"><span class="kb-key">P</span><span>Stylus only on / off (palm rejection + finger pinch-zoom)</span></div>
+      <div class="kb-row"><span class="kb-key">V</span><span>Side-by-side compare (when both images loaded)</span></div>
       <div class="kb-row"><span class="kb-key">B</span><span>Save current pair as a page</span></div>
       <div class="kb-row"><span class="kb-key">R</span><span>Shuffle a page (uses current filters)</span></div>
     </div>
@@ -675,6 +712,51 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   // Apply persisted state on load
   applyStylusOnly();
 
+  // ---- Side-by-side compare toggle ----
+  state.splitMode = false;
+  try { state.splitMode = localStorage.getItem('acb-split-mode') === '1'; } catch (e) {}
+  var splitToggleBtn = document.getElementById('splitToggleBtn');
+  function applySplitMode() {
+    wrap.classList.toggle('is-split', state.splitMode);
+    splitToggleBtn.classList.toggle('is-active', state.splitMode);
+    splitToggleBtn.setAttribute('aria-pressed', state.splitMode ? 'true' : 'false');
+    try { localStorage.setItem('acb-split-mode', state.splitMode ? '1' : '0'); } catch (e) {}
+    // In split mode, both images are visible; in single mode, honor the showingKey toggle
+    if (state.splitMode) {
+      if (state.practiceURL) practiceImg.classList.remove('is-hidden');
+      if (state.keyURL)      keyImg.classList.remove('is-hidden');
+      // Show Key toggle is moot in split mode (both visible); grey it out
+      keyToggleBtn.disabled = true;
+      keyToggleBtn.title = 'Both images are visible in side-by-side mode';
+    } else {
+      if (state.showingKey) {
+        practiceImg.classList.add('is-hidden');
+        if (state.keyURL) keyImg.classList.remove('is-hidden');
+      } else {
+        if (state.practiceURL) practiceImg.classList.remove('is-hidden');
+        keyImg.classList.add('is-hidden');
+      }
+      keyToggleBtn.disabled = !state.keyURL;
+      keyToggleBtn.title = '';
+    }
+    // Recompute canvas size after layout changes
+    requestAnimationFrame(resize);
+  }
+  splitToggleBtn.addEventListener('click', function () {
+    if (splitToggleBtn.disabled) return;
+    state.splitMode = !state.splitMode;
+    applySplitMode();
+  });
+  function updateSplitToggleBtn() {
+    splitToggleBtn.disabled = !(state.practiceURL && state.keyURL);
+    if (splitToggleBtn.disabled && state.splitMode) {
+      state.splitMode = false;
+      applySplitMode();
+    }
+  }
+  // Apply persisted state on load (may be disabled if no images yet)
+  applySplitMode();
+
   // ---- Grid toggle ----
   gridBtn.addEventListener('click', function () {
     var on = !wrap.classList.contains('is-grid');
@@ -763,6 +845,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     }
     refreshEmptyMessage();
     updateSaveBankBtn();
+    updateSplitToggleBtn();
   }
 
   function updateSaveBankBtn() {
@@ -787,6 +870,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     }
     refreshEmptyMessage();
     updateSaveBankBtn();
+    updateSplitToggleBtn();
   }
 
   function decorateDropZone(zoneId, fileName, dataURL) {
@@ -879,8 +963,12 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   }
 
   // ---- Canvas sizing ----
+  // The canvas now lives inside the practice pane; size to that, not the whole wrap
+  // (in split mode the wrap is wider than the canvas's pane).
+  var panePractice = document.getElementById('panePractice');
   function resize() {
-    var rect = wrap.getBoundingClientRect();
+    var host = panePractice || wrap;
+    var rect = host.getBoundingClientRect();
     var dpr = window.devicePixelRatio || 1;
     state.dpr = dpr;
     canvas.width  = Math.max(1, Math.floor(rect.width * dpr));
@@ -891,7 +979,11 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     redraw();
   }
   window.addEventListener('resize', resize);
-  if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap);
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(resize);
+    ro.observe(panePractice || wrap);
+    ro.observe(wrap);
+  }
   resize();
 
   // ---- Pointer drawing ----
@@ -939,15 +1031,26 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     var t = e.touches && e.touches[0];
     if (t && t.touchType === 'stylus') return;       // Apple Pencil: let pointer events handle it
     if (state.stylusOnly) return;                    // finger in stylus-only mode: let browser pinch-zoom
+    if (e.touches && e.touches.length > 1) return;   // multi-finger gesture: let browser pinch-zoom
     e.preventDefault();
   }, { passive: false });
   canvas.addEventListener('touchmove', function (e) {
     var t = e.touches && e.touches[0];
     if (t && t.touchType === 'stylus') return;
     if (state.stylusOnly) return;
+    if (e.touches && e.touches.length > 1) return;
     e.preventDefault();
   }, { passive: false });
-  canvas.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+  // gesturestart fires on iOS Safari for pinch/rotate. Only block it in normal-mode
+  // single-touch drawing flows; in stylus-only mode we want to let pinch through.
+  canvas.addEventListener('gesturestart', function (e) {
+    if (state.stylusOnly) return;
+    e.preventDefault();
+  });
+  canvas.addEventListener('gesturechange', function (e) {
+    if (state.stylusOnly) return;
+    e.preventDefault();
+  });
   canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   function drawStrokeSegment(stroke, fromIdx) {
@@ -1037,6 +1140,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     else if (k === 'd') { setBackground(state.bgDark ? 'light' : 'dark'); e.preventDefault(); }
     else if (k === 'g') { gridBtn.click(); e.preventDefault(); }
     else if (k === 'p') { stylusOnlyBtn.click(); e.preventDefault(); }
+    else if (k === 'v') { if (!splitToggleBtn.disabled) { splitToggleBtn.click(); e.preventDefault(); } }
     else if (k === 's') { savePNG(); e.preventDefault(); }
     else if (k === '[') {
       var idx = SIZES.indexOf(state.size);

@@ -137,12 +137,19 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-vis
 .pane-zoom-content { position: absolute; inset: 0; transform-origin: 0 0; transform: translate(var(--acb-pan-x), var(--acb-pan-y)) scale(var(--acb-zoom)); will-change: transform; }
 .pane-zoom-content.is-animating { transition: transform 240ms ease-out; }
 
-.zoom-indicator { position: absolute; left: 12px; bottom: 12px; background: rgba(11, 21, 48, 0.86); color: #FAFAF9; font-size: 10.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; border: none; cursor: pointer; z-index: 5; font-family: inherit; opacity: 0; transition: opacity 180ms ease; display: inline-flex; align-items: center; gap: 8px; }
-.zoom-indicator::after { content: "Reset"; font-weight: 700; opacity: 0.7; letter-spacing: 0.10em; }
-.zoom-indicator.is-visible { opacity: 1; }
-.zoom-indicator:hover, .zoom-indicator:focus-visible { background: #0B1530; }
-.canvas-wrap.is-dark .zoom-indicator { background: rgba(250, 250, 249, 0.92); color: #0B1530; }
-.canvas-wrap.is-dark .zoom-indicator:hover { background: #FAFAF9; }
+/* Zoom controls (always visible). Buttons work as a guaranteed fallback for iPad/iframe
+   contexts where native pinch is blocked by Canvas's outer viewport. */
+.zoom-controls { position: absolute; left: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; z-index: 5; background: rgba(11, 21, 48, 0.78); border-radius: 999px; padding: 3px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.canvas-wrap.is-dark .zoom-controls { background: rgba(250, 250, 249, 0.78); }
+.zoom-btn { background: transparent; color: #FAFAF9; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: 800; line-height: 1; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+.zoom-btn:hover, .zoom-btn:focus-visible { background: rgba(255, 255, 255, 0.18); }
+.zoom-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.canvas-wrap.is-dark .zoom-btn { color: #0B1530; }
+.canvas-wrap.is-dark .zoom-btn:hover { background: rgba(11, 21, 48, 0.12); }
+.zoom-level { background: transparent; color: #FAFAF9; border: none; padding: 0 12px; min-width: 64px; font-family: inherit; font-size: 11px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; cursor: pointer; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; }
+.zoom-level:hover, .zoom-level:focus-visible { background: rgba(255, 255, 255, 0.18); }
+.canvas-wrap.is-dark .zoom-level { color: #0B1530; }
+.canvas-wrap.is-dark .zoom-level:hover { background: rgba(11, 21, 48, 0.12); }
 
 /* Pane structure: in single mode, panes overlap and only one is visible at a time.
    In side-by-side mode, panes split the wrap 50/50 (or stack vertically on narrow screens). */
@@ -471,7 +478,11 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
           <span class="pane-label is-key" aria-hidden="true">Answer key</span>
         </div>
         <span class="stylus-badge" id="stylusBadge" aria-hidden="true">Stylus only</span>
-        <button type="button" class="zoom-indicator" id="zoomIndicator" aria-label="Current zoom level. Tap to reset to 100%.">100%</button>
+        <div class="zoom-controls" id="zoomControls" role="group" aria-label="Zoom controls">
+          <button type="button" class="zoom-btn" id="zoomOutBtn" aria-label="Zoom out (Down arrow or minus key)">&minus;</button>
+          <button type="button" class="zoom-level" id="zoomIndicator" aria-label="Current zoom level. Tap to reset to 100%.">100%</button>
+          <button type="button" class="zoom-btn" id="zoomInBtn" aria-label="Zoom in (Up arrow or plus key)">&#43;</button>
+        </div>
         <div class="canvas-empty" id="canvasEmpty" aria-hidden="true">
           <span class="canvas-empty-title">No image loaded yet</span>
           <span class="canvas-empty-sub">Drop an unlabeled atlas image above to start labeling. The canvas works without an image too, if you just want a blank scratch space.</span>
@@ -494,6 +505,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       <div class="kb-row"><span class="kb-key">S</span><span>Save annotated PNG</span></div>
       <div class="kb-row"><span class="kb-key">P</span><span>Stylus only on / off (palm rejection + finger pinch-zoom)</span></div>
       <div class="kb-row"><span class="kb-key">V</span><span>Side-by-side compare (when both images loaded)</span></div>
+      <div class="kb-row"><span class="kb-key">&plus;</span>&nbsp;<span class="kb-key">&minus;</span><span>Zoom in / out (also &uarr; / &darr;)</span></div>
+      <div class="kb-row"><span class="kb-key">0</span><span>Reset zoom to 100%</span></div>
       <div class="kb-row"><span class="kb-key">B</span><span>Save current pair as a page</span></div>
       <div class="kb-row"><span class="kb-key">R</span><span>Shuffle a page (uses current filters)</span></div>
     </div>
@@ -772,6 +785,135 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   // Apply persisted state on load (may be disabled if no images yet)
   applySplitMode();
 
+  // ---- Custom in-canvas zoom + pan ----
+  // Two-finger pinch on the canvas-wrap zooms the panes via CSS transform;
+  // two-finger drag pans. Drawing coordinates auto-adjust through getXY.
+  // Works regardless of iframe / Canvas viewport restrictions.
+  state.zoom = 1;
+  state.panX = 0;
+  state.panY = 0;
+  state.gestureActive = false;
+  var ZOOM_MIN = 1;
+  var ZOOM_MAX = 5;
+  var ZOOM_STEP = 0.25;
+  var zoomIndicator = document.getElementById('zoomIndicator');
+  var zoomInBtn    = document.getElementById('zoomInBtn');
+  var zoomOutBtn   = document.getElementById('zoomOutBtn');
+
+  function applyZoom(animate) {
+    wrap.style.setProperty('--acb-zoom', state.zoom);
+    wrap.style.setProperty('--acb-pan-x', state.panX + 'px');
+    wrap.style.setProperty('--acb-pan-y', state.panY + 'px');
+    zoomIndicator.textContent = Math.round(state.zoom * 100) + '%';
+    zoomInBtn.disabled  = state.zoom >= ZOOM_MAX - 0.001;
+    zoomOutBtn.disabled = state.zoom <= ZOOM_MIN + 0.001;
+    wrap.querySelectorAll('.pane-zoom-content').forEach(function (el) {
+      el.classList.toggle('is-animating', !!animate);
+    });
+  }
+  function resetZoom() {
+    state.zoom = 1; state.panX = 0; state.panY = 0;
+    applyZoom(true);
+    clearAnimAfter(280);
+  }
+  function clearAnimAfter(ms) {
+    setTimeout(function () {
+      wrap.querySelectorAll('.pane-zoom-content').forEach(function (el) {
+        el.classList.remove('is-animating');
+      });
+    }, ms);
+  }
+  // Step zoom (button / keyboard). Zooms around the center of the canvas-wrap so
+  // the focal point stays put.
+  function stepZoom(delta) {
+    var oldZoom = state.zoom;
+    var newZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, oldZoom + delta));
+    if (Math.abs(newZoom - oldZoom) < 0.001) return;
+    var wr = wrap.getBoundingClientRect();
+    // Use whichever pane is showing as the focal target. In split mode, use the practice pane.
+    var focus = panePractice ? panePractice.getBoundingClientRect() : wr;
+    var centerX = focus.left - wr.left + focus.width / 2;
+    var centerY = focus.top  - wr.top  + focus.height / 2;
+    var contentX = (centerX - state.panX) / oldZoom;
+    var contentY = (centerY - state.panY) / oldZoom;
+    state.zoom = newZoom;
+    state.panX = centerX - contentX * newZoom;
+    state.panY = centerY - contentY * newZoom;
+    if (Math.abs(state.zoom - 1) < 0.001) { state.panX = 0; state.panY = 0; }
+    applyZoom(true);
+    clearAnimAfter(280);
+  }
+  applyZoom(false);
+
+  zoomIndicator.addEventListener('click', function () { resetZoom(); });
+  zoomInBtn.addEventListener('click',   function () { stepZoom( ZOOM_STEP); });
+  zoomOutBtn.addEventListener('click',  function () { stepZoom(-ZOOM_STEP); });
+
+  // Pinch / pan gesture tracking
+  var pinchStart = null;
+  function getTouchList(e) {
+    var list = [];
+    for (var i = 0; i < e.touches.length; i++) {
+      list.push({ x: e.touches[i].clientX, y: e.touches[i].clientY });
+    }
+    return list;
+  }
+  function dist(a, b) { var dx = a.x - b.x, dy = a.y - b.y; return Math.sqrt(dx * dx + dy * dy); }
+  function mid(a, b)  { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+
+  wrap.addEventListener('touchstart', function (e) {
+    if (e.touches.length >= 2) {
+      e.preventDefault();
+      // Cancel any in-progress stroke when the gesture begins
+      if (state.currentStroke) state.currentStroke = null;
+      state.gestureActive = true;
+      var t = getTouchList(e);
+      var wr = wrap.getBoundingClientRect();
+      pinchStart = {
+        touches: [t[0], t[1]],
+        startDist: dist(t[0], t[1]),
+        startMid: mid(t[0], t[1]),
+        startZoom: state.zoom,
+        startPanX: state.panX,
+        startPanY: state.panY,
+        wrapLeft: wr.left,
+        wrapTop:  wr.top
+      };
+      // No animation during pinch
+      wrap.querySelectorAll('.pane-zoom-content').forEach(function (el) {
+        el.classList.remove('is-animating');
+      });
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchmove', function (e) {
+    if (!pinchStart || e.touches.length < 2) return;
+    e.preventDefault();
+    var t = getTouchList(e);
+    var newDist = dist(t[0], t[1]);
+    var newMid = mid(t[0], t[1]);
+    var scaleDelta = newDist / pinchStart.startDist;
+    var newZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, pinchStart.startZoom * scaleDelta));
+    // Keep the content point originally under the start midpoint anchored under the new midpoint.
+    var startContentX = (pinchStart.startMid.x - pinchStart.wrapLeft - pinchStart.startPanX) / pinchStart.startZoom;
+    var startContentY = (pinchStart.startMid.y - pinchStart.wrapTop  - pinchStart.startPanY) / pinchStart.startZoom;
+    state.zoom = newZoom;
+    state.panX = (newMid.x - pinchStart.wrapLeft) - startContentX * newZoom;
+    state.panY = (newMid.y - pinchStart.wrapTop)  - startContentY * newZoom;
+    // Hard pan clamp at zoom == 1 (don't drift off-screen at default zoom)
+    if (Math.abs(state.zoom - 1) < 0.001) { state.panX = 0; state.panY = 0; }
+    applyZoom(false);
+  }, { passive: false });
+
+  function endGesture(e) {
+    if (e && e.touches && e.touches.length >= 2) return;
+    pinchStart = null;
+    // Slight delay so a pen stroke doesn't start in the same tick as a finger lift
+    setTimeout(function () { state.gestureActive = false; }, 80);
+  }
+  wrap.addEventListener('touchend', endGesture);
+  wrap.addEventListener('touchcancel', endGesture);
+
   // ---- Grid toggle ----
   gridBtn.addEventListener('click', function () {
     var on = !wrap.classList.contains('is-grid');
@@ -1002,12 +1144,23 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   resize();
 
   // ---- Pointer drawing ----
+  // Zoom-aware coordinate translation. canvas.getBoundingClientRect() returns the
+  // post-transform visual rect. We divide the offset by the visual width and
+  // multiply by the canvas's logical (style) size to land in drawing-context space.
   function getXY(ev) {
     var r = canvas.getBoundingClientRect();
-    return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+    var styleW = parseFloat(canvas.style.width)  || r.width  || 1;
+    var styleH = parseFloat(canvas.style.height) || r.height || 1;
+    return {
+      x: (ev.clientX - r.left) * (styleW / r.width),
+      y: (ev.clientY - r.top)  * (styleH / r.height)
+    };
   }
   // Returns true when this pointer event should be allowed to draw.
   function isDrawingPointer(ev) {
+    // Active pinch / pan gesture: don't draw, even from pen (pen + finger could mean
+    // the user is steadying with pen while pinching with two fingers).
+    if (state.gestureActive) return false;
     if (!state.stylusOnly) return true;
     // In stylus-only mode, only pen-type pointers draw. Mouse still draws on desktop,
     // touch/finger does not. Apple Pencil reports pointerType === 'pen'.
@@ -1157,6 +1310,10 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     else if (k === 'p') { stylusOnlyBtn.click(); e.preventDefault(); }
     else if (k === 'v') { if (!splitToggleBtn.disabled) { splitToggleBtn.click(); e.preventDefault(); } }
     else if (k === 's') { savePNG(); e.preventDefault(); }
+    // Zoom: +/= zoom in, - zoom out, ArrowUp/Down also, 0 (when zoomed) resets
+    else if (k === '+' || k === '=' || e.key === 'ArrowUp')   { stepZoom( ZOOM_STEP); e.preventDefault(); }
+    else if (k === '-' || e.key === 'ArrowDown')               { stepZoom(-ZOOM_STEP); e.preventDefault(); }
+    else if (k === '0' && state.zoom !== 1)                    { resetZoom(); e.preventDefault(); }
     else if (k === '[') {
       var idx = SIZES.indexOf(state.size);
       if (idx > 0) document.querySelector('.size-btn[data-size="' + SIZES[idx - 1] + '"]').click();

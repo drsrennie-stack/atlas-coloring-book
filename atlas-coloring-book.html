@@ -130,6 +130,16 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-vis
     linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+/* Stylus-only mode lets the browser handle pinch-zoom with fingers; pencil still draws */
+.canvas-wrap.stylus-only { touch-action: pinch-zoom; }
+.canvas-wrap.stylus-only .draw-canvas { touch-action: pinch-zoom; }
+.stylus-badge { position: absolute; top: 10px; right: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(11, 21, 48, 0.86); color: #FAFAF9; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; border-radius: 999px; pointer-events: none; z-index: 4; }
+.stylus-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #C9A14A; }
+.canvas-wrap.is-dark .stylus-badge { background: rgba(250, 250, 249, 0.92); color: #0B1530; }
+.canvas-wrap.is-dark .stylus-badge::before { background: #8B3A2E; }
+.canvas-wrap:not(.stylus-only) .stylus-badge { display: none; }
+.action-btn.stylus-toggle.is-active { background: #2A6F7A; color: #FFFFFF; border-color: #2A6F7A; }
+.action-btn.stylus-toggle.is-active:hover { background: #225A63; border-color: #225A63; color: #FFFFFF; }
 .canvas-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; opacity: 1; transition: opacity 180ms ease; }
 .canvas-image.is-hidden { opacity: 0; }
 .draw-canvas { display: block; width: 100%; height: 100%; position: absolute; inset: 0; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
@@ -370,6 +380,10 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
         <button type="button" class="action-btn" id="clearBtn">Clear</button>
       </div>
 
+      <div class="tool-group" aria-label="Input mode">
+        <button type="button" class="action-btn stylus-toggle" id="stylusOnlyBtn" aria-pressed="false" title="When on, only Apple Pencil (or other stylus) draws. Fingers can pinch-zoom without leaving marks.">Stylus only<span class="kbd">P</span></button>
+      </div>
+
       <div class="tool-group" aria-label="Background">
         <span class="tool-label">Bg</span>
         <div class="bg-toggle-group" role="group" aria-label="Canvas background tone">
@@ -407,6 +421,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
         <img class="canvas-image is-hidden" id="practiceImg" alt="" aria-hidden="true">
         <img class="canvas-image is-hidden" id="keyImg" alt="" aria-hidden="true">
         <canvas class="draw-canvas" id="drawCanvas" role="img" aria-label="Labeling canvas"></canvas>
+        <span class="stylus-badge" id="stylusBadge" aria-hidden="true">Stylus only</span>
         <div class="canvas-empty" id="canvasEmpty" aria-hidden="true">
           <span class="canvas-empty-title">No image loaded yet</span>
           <span class="canvas-empty-sub">Drop an unlabeled atlas image above to start labeling. The canvas works without an image too, if you just want a blank scratch space.</span>
@@ -423,6 +438,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       <div class="kb-row"><span class="kb-key">U</span><span>Undo last stroke</span></div>
       <div class="kb-row"><span class="kb-key">D</span><span>Dark / light background</span></div>
       <div class="kb-row"><span class="kb-key">G</span><span>Grid on/off</span></div>
+      <div class="kb-row"><span class="kb-key">P</span><span>Stylus only (Apple Pencil drawing, finger zoom)</span></div>
       <div class="kb-row"><span class="kb-key">1</span>&ndash;<span class="kb-key">9</span>&nbsp;<span class="kb-key">0</span><span>Pick pen color (white = click only)</span></div>
       <div class="kb-row"><span class="kb-key">[</span>&nbsp;<span class="kb-key">]</span><span>Pen smaller / bigger</span></div>
       <div class="kb-row"><span class="kb-key">S</span><span>Save annotated PNG</span></div>
@@ -580,8 +596,11 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     practiceURL: null,
     keyURL: null,
     showingKey: false,
-    bgDark: false
+    bgDark: false,
+    stylusOnly: false
   };
+  // Load persisted preference
+  try { state.stylusOnly = localStorage.getItem('acb-stylus-only') === '1'; } catch (e) {}
 
   // ---- DOM refs ----
   var wrap         = document.getElementById('canvasWrap');
@@ -640,6 +659,21 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
   }
+
+  // ---- Stylus-only toggle ----
+  var stylusOnlyBtn = document.getElementById('stylusOnlyBtn');
+  function applyStylusOnly() {
+    wrap.classList.toggle('stylus-only', state.stylusOnly);
+    stylusOnlyBtn.classList.toggle('is-active', state.stylusOnly);
+    stylusOnlyBtn.setAttribute('aria-pressed', state.stylusOnly ? 'true' : 'false');
+    try { localStorage.setItem('acb-stylus-only', state.stylusOnly ? '1' : '0'); } catch (e) {}
+  }
+  stylusOnlyBtn.addEventListener('click', function () {
+    state.stylusOnly = !state.stylusOnly;
+    applyStylusOnly();
+  });
+  // Apply persisted state on load
+  applyStylusOnly();
 
   // ---- Grid toggle ----
   gridBtn.addEventListener('click', function () {
@@ -865,7 +899,16 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     var r = canvas.getBoundingClientRect();
     return { x: ev.clientX - r.left, y: ev.clientY - r.top };
   }
+  // Returns true when this pointer event should be allowed to draw.
+  function isDrawingPointer(ev) {
+    if (!state.stylusOnly) return true;
+    // In stylus-only mode, only pen-type pointers draw. Mouse still draws on desktop,
+    // touch/finger does not. Apple Pencil reports pointerType === 'pen'.
+    return ev.pointerType === 'pen' || ev.pointerType === 'mouse';
+  }
+
   canvas.addEventListener('pointerdown', function (ev) {
+    if (!isDrawingPointer(ev)) return;        // finger in stylus-only mode: ignore, let browser zoom
     ev.preventDefault();
     if (canvas.setPointerCapture) { try { canvas.setPointerCapture(ev.pointerId); } catch (e) {} }
     var p = getXY(ev);
@@ -880,6 +923,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   });
   canvas.addEventListener('pointermove', function (ev) {
     if (!state.currentStroke) return;
+    if (!isDrawingPointer(ev)) return;
     ev.preventDefault();
     var p = getXY(ev);
     var s = state.currentStroke;
@@ -893,12 +937,14 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   canvas.addEventListener('pointerleave',  endStroke);
   canvas.addEventListener('touchstart', function (e) {
     var t = e.touches && e.touches[0];
-    if (t && t.touchType === 'stylus') return;
+    if (t && t.touchType === 'stylus') return;       // Apple Pencil: let pointer events handle it
+    if (state.stylusOnly) return;                    // finger in stylus-only mode: let browser pinch-zoom
     e.preventDefault();
   }, { passive: false });
   canvas.addEventListener('touchmove', function (e) {
     var t = e.touches && e.touches[0];
     if (t && t.touchType === 'stylus') return;
+    if (state.stylusOnly) return;
     e.preventDefault();
   }, { passive: false });
   canvas.addEventListener('gesturestart', function (e) { e.preventDefault(); });
@@ -990,6 +1036,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     else if (k === 'u') { undo(); e.preventDefault(); }
     else if (k === 'd') { setBackground(state.bgDark ? 'light' : 'dark'); e.preventDefault(); }
     else if (k === 'g') { gridBtn.click(); e.preventDefault(); }
+    else if (k === 'p') { stylusOnlyBtn.click(); e.preventDefault(); }
     else if (k === 's') { savePNG(); e.preventDefault(); }
     else if (k === '[') {
       var idx = SIZES.indexOf(state.size);

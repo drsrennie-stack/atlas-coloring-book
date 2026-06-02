@@ -115,7 +115,7 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-vis
 
 /* CANVAS */
 .canvas-col { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-.canvas-wrap { position: relative; background: #FFFFFF; flex: 1; min-height: 560px; cursor: crosshair; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; overscroll-behavior: contain; transition: background-color 200ms ease; }
+.canvas-wrap { position: relative; background: #FFFFFF; flex: 1; min-height: 560px; cursor: crosshair; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; overscroll-behavior: contain; transition: background-color 200ms ease; }
 .canvas-wrap.is-dark { background: #060A18; }
 .canvas-wrap.is-erasing { cursor: cell; }
 .canvas-wrap.is-grid {
@@ -130,9 +130,10 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-vis
     linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   background-size: 24px 24px;
 }
-/* Stylus-only mode: pencil draws, finger does NOT draw. Pinch/pan handled by custom JS. */
-.canvas-wrap { touch-action: none; }
-/* Pinch-zoom + pan apply through CSS variables, set by JS in real time. */
+/* Pinch/pan applied through CSS variables, set by JS in real time.
+   NOTE: touch-action is set on the inner .draw-canvas only, NOT on the wrap.
+   Setting touch-action:none on the wrap suppresses Apple Pencil pointer events
+   to descendants on some iPadOS Safari builds. */
 .canvas-wrap { --acb-zoom: 1; --acb-pan-x: 0px; --acb-pan-y: 0px; }
 .pane-zoom-content { position: absolute; inset: 0; transform-origin: 0 0; transform: translate(var(--acb-pan-x), var(--acb-pan-y)) scale(var(--acb-zoom)); will-change: transform; }
 .pane-zoom-content.is-animating { transition: transform 240ms ease-out; }

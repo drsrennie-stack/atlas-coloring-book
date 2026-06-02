@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas Coloring Book &middot; BIO 004</title>
+<style>
+@import url('https://cdn.jsdelivr.net/npm/@fontsource-variable/plus-jakarta-sans/index.css');
+* { box-sizing: border-box; } html, body { margin: 0; padding: 0; font-size: 16px; line-height: 1.5; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+body { font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif; background: #FAFAF9; color: #0B1530; }
+img { max-width: 100%; display: block; } a { color: inherit; }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-visible { outline: 3px solid #8B3A2E; outline-offset: 3px; border-radius: 4px; }
+.skip-link { position: absolute; top: -100px; left: 8px; background: #0B1530; color: #FAFAF9; padding: 12px 20px; text-decoration: none; font-size: 13px; font-weight: 700; border-radius: 4px; z-index: 9999; letter-spacing: 0.04em; }
+.skip-link:focus { top: 8px; }
+
+.site-header, .lecture-hero, .workspace, .footer-section { padding-left: max(24px, 3vw); padding-right: max(24px, 3vw); }
+.site-header { background: #FFFFFF; padding-top: 18px; padding-bottom: 14px; }
+.site-logo { display: inline-flex; align-items: center; gap: 14px; text-decoration: none; }
+.site-logo svg { height: 46px; width: auto; display: block; }
+.logo-text { display: flex; flex-direction: column; gap: 2px; }
+.logo-title { font-size: 21px; font-weight: 800; color: #0B1530; line-height: 1; }
+.logo-title .logo-accent { color: #8B3A2E; }
+.logo-sub { font-size: 10px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; opacity: 0.72; }
+
+.lecture-hero { background: #FFFFFF; padding-top: 18px; padding-bottom: 22px; }
+.hero-eyebrow { font-size: 10.5px; font-weight: 700; color: #8B3A2E; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 10px; }
+.hero-headline { font-size: clamp(26px, 3.4vw, 38px); font-weight: 800; color: #0B1530; line-height: 1.06; margin: 0 0 10px; }
+.hero-headline .accent { color: #8B3A2E; }
+.hero-subhead { font-size: 14.5px; color: #0B1530; line-height: 1.55; opacity: 0.84; margin: 0; max-width: 820px; }
+.hero-actions { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+.hero-actions button { background: #0B1530; color: #FFFFFF; border: none; padding: 9px 16px; border-radius: 4px; font-family: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; }
+.hero-actions button:hover { background: #142A36; }
+.hero-actions button.ghost { background: transparent; color: #0B1530; border: 1px solid rgba(11, 21, 48, 0.30); }
+.hero-actions button.ghost:hover { background: #FAFAF9; border-color: #8B3A2E; color: #8B3A2E; }
+
+.workspace { padding-top: 24px; padding-bottom: 36px; max-width: 1400px; margin: 0 auto; }
+
+/* SETUP PANEL */
+.setup { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 10px; box-shadow: 0 1px 3px rgba(11, 21, 48, 0.06); padding: 22px; margin-bottom: 22px; }
+.setup h2 { font-size: 12px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; color: #8B3A2E; margin: 0 0 14px; }
+.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.drop-zone { border: 2px dashed rgba(11, 21, 48, 0.25); border-radius: 8px; padding: 22px; text-align: center; background: #FAFAF9; cursor: pointer; transition: border-color 200ms ease, background 200ms ease; position: relative; min-height: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.drop-zone:hover, .drop-zone.is-hover { border-color: #8B3A2E; background: #FFFFFF; }
+.drop-zone.is-filled { border-style: solid; border-color: #0B1530; background: #FFFFFF; }
+.drop-zone-eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; color: #8B3A2E; }
+.drop-zone-title { font-size: 15px; font-weight: 800; color: #0B1530; line-height: 1.25; }
+.drop-zone-hint { font-size: 12px; color: #0B1530; opacity: 0.7; line-height: 1.4; }
+.drop-zone-thumb { width: 100%; max-width: 200px; max-height: 90px; object-fit: contain; border-radius: 4px; margin-bottom: 4px; background: #060A18; padding: 4px; }
+.drop-zone-status { font-size: 11px; font-weight: 700; color: #2A6F7A; letter-spacing: 0.10em; text-transform: uppercase; }
+.drop-zone-clear { position: absolute; top: 6px; right: 6px; background: transparent; border: none; color: #0B1530; opacity: 0.55; cursor: pointer; padding: 4px 8px; font-size: 12px; font-weight: 700; border-radius: 3px; }
+.drop-zone-clear:hover { opacity: 1; color: #8B3A2E; background: rgba(0,0,0,0.04); }
+.drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+/* CANVAS BLOCK */
+.canvas-block { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 10px; box-shadow: 0 1px 3px rgba(11, 21, 48, 0.06); overflow: hidden; transition: transform 200ms ease, box-shadow 200ms ease; }
+.canvas-block:hover, .canvas-block:focus-within { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(11, 21, 48, 0.10); }
+
+.canvas-header { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; padding: 14px 22px; background: #FAFAF9; border-bottom: 1px solid rgba(11, 21, 48, 0.14); }
+.canvas-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; color: #0B1530; opacity: 0.62; margin: 0 0 4px; }
+.canvas-title { font-size: clamp(16px, 2vw, 20px); font-weight: 800; color: #0B1530; line-height: 1.2; margin: 0; }
+.canvas-mode-pill { font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; background: #0B1530; color: #FAFAF9; display: inline-flex; align-items: center; gap: 6px; }
+.canvas-mode-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #C9A14A; }
+.canvas-mode-pill.is-key { background: #8B3A2E; }
+.canvas-mode-pill.is-key::before { background: #FAFAF9; }
+
+/* TOOLBAR */
+.canvas-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; background: #FAFAF9; border-bottom: 1px solid rgba(11, 21, 48, 0.10); }
+.tool-group { display: flex; align-items: center; gap: 4px; padding: 0 6px; border-right: 1px solid rgba(11, 21, 48, 0.12); }
+.tool-group:last-of-type { border-right: none; }
+.tool-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #0B1530; opacity: 0.6; margin-right: 4px; }
+
+.swatch { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); position: relative; }
+.swatch:hover { transform: scale(1.08); }
+.swatch.is-active { border-color: #0B1530; transform: scale(1.10); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12), 0 0 0 2px #FAFAF9; }
+.swatch.magenta { background: #FF2D87; }
+.swatch.cyan    { background: #00E5FF; }
+.swatch.lime    { background: #B6FF1F; }
+.swatch.yellow  { background: #FFE600; }
+.swatch.orange  { background: #FF7A1A; }
+.swatch.violet  { background: #B26BFF; }
+.swatch.crimson { background: #C0392B; }
+.swatch.blue    { background: #1F5BB8; }
+.swatch.forest  { background: #1F7A3A; }
+.swatch.navy    { background: #0B1530; }
+.swatch.white   { background: #FFFFFF; box-shadow: inset 0 0 0 1px rgba(11,21,48,0.45); }
+
+.size-btn { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.20); border-radius: 4px; width: 30px; height: 28px; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.size-btn:hover { border-color: #8B3A2E; }
+.size-btn.is-active { border-color: #0B1530; background: #FAFAF9; }
+.size-btn .dot { display: block; background: #0B1530; border-radius: 50%; }
+.size-btn[data-size="2"] .dot { width: 4px; height: 4px; }
+.size-btn[data-size="4"] .dot { width: 7px; height: 7px; }
+.size-btn[data-size="8"] .dot { width: 11px; height: 11px; }
+.size-btn[data-size="14"] .dot { width: 16px; height: 16px; }
+
+.action-btn { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.20); border-radius: 4px; padding: 7px 12px; font-family: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: #0B1530; cursor: pointer; }
+.action-btn:hover { border-color: #8B3A2E; color: #8B3A2E; }
+.action-btn.is-active { background: #0B1530; color: #FFFFFF; border-color: #0B1530; }
+.action-btn.primary { background: #8B3A2E; color: #FFFFFF; border-color: #8B3A2E; }
+.action-btn.primary:hover { background: #A0452F; color: #FFFFFF; border-color: #A0452F; }
+.action-btn.key-toggle { background: #C9A14A; color: #0B1530; border-color: #C9A14A; font-weight: 800; }
+.action-btn.key-toggle:hover { background: #B8924A; border-color: #B8924A; color: #0B1530; }
+.action-btn.key-toggle.is-active { background: #8B3A2E; color: #FFFFFF; border-color: #8B3A2E; }
+.action-btn.key-toggle:disabled { background: #FAFAF9; color: rgba(11, 21, 48, 0.4); border-color: rgba(11, 21, 48, 0.18); cursor: not-allowed; }
+.action-btn .kbd { display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 5px; margin-left: 6px; border-radius: 3px; background: rgba(0,0,0,0.15); letter-spacing: 0.04em; }
+.action-btn.key-toggle .kbd { background: rgba(11,21,48,0.18); color: inherit; }
+.action-btn.key-toggle.is-active .kbd { background: rgba(255,255,255,0.22); color: #FFFFFF; }
+
+.bg-toggle-group { display: inline-flex; border: 1px solid rgba(11, 21, 48, 0.20); border-radius: 4px; overflow: hidden; }
+.bg-toggle-group button { background: #FFFFFF; border: none; padding: 7px 12px; font-family: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: #0B1530; cursor: pointer; border-right: 1px solid rgba(11, 21, 48, 0.20); }
+.bg-toggle-group button:last-child { border-right: none; }
+.bg-toggle-group button:hover { color: #8B3A2E; }
+.bg-toggle-group button.is-active { background: #0B1530; color: #FFFFFF; }
+
+/* CANVAS */
+.canvas-col { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.canvas-wrap { position: relative; background: #FFFFFF; flex: 1; min-height: 560px; cursor: crosshair; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; overscroll-behavior: contain; transition: background-color 200ms ease; }
+.canvas-wrap.is-dark { background: #060A18; }
+.canvas-wrap.is-erasing { cursor: cell; }
+.canvas-wrap.is-grid {
+  background-image:
+    linear-gradient(rgba(11, 21, 48, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 21, 48, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.canvas-wrap.is-dark.is-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.canvas-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; opacity: 1; transition: opacity 180ms ease; }
+.canvas-image.is-hidden { opacity: 0; }
+.draw-canvas { display: block; width: 100%; height: 100%; position: absolute; inset: 0; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
+
+.canvas-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 40px; text-align: center; color: #0B1530; pointer-events: none; }
+.canvas-wrap.is-dark .canvas-empty { color: #FAFAF9; }
+.canvas-empty-title { font-size: 16px; font-weight: 800; letter-spacing: 0.02em; }
+.canvas-empty-sub { font-size: 13px; opacity: 0.7; max-width: 420px; line-height: 1.5; }
+
+/* KEYBOARD HELP */
+.keyboard-help { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 10px; padding: 16px 22px; margin-top: 22px; }
+.keyboard-help h2 { font-size: 12px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; color: #8B3A2E; margin: 0 0 10px; }
+.kb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 24px; }
+.kb-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #0B1530; }
+.kb-key { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 24px; padding: 0 7px; border-radius: 4px; background: #FAFAF9; border: 1px solid rgba(11, 21, 48, 0.20); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; font-weight: 700; color: #0B1530; }
+
+.footer-section { background: #060A18; padding-top: 22px; padding-bottom: 18px; text-align: center; }
+.footer-section p { margin: 0; }
+.footer-byline { font-size: 10.5px; font-weight: 700; color: #C9A14A; letter-spacing: 0.18em; text-transform: uppercase; }
+.footer-meta { font-size: 11.5px; color: #FAFAF9; opacity: 0.78; margin-top: 6px; }
+.footer-meta a { color: #C9A14A; text-decoration: underline; }
+
+@media (max-width: 760px) {
+  .setup-grid { grid-template-columns: 1fr; }
+  .canvas-wrap { min-height: 440px; }
+  .tool-label { display: none; }
+  .canvas-header { padding: 12px 16px; }
+}
+@media (max-width: 480px) {
+  .hero-headline { font-size: 26px; }
+  .canvas-wrap { min-height: 380px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  html { scroll-behavior: auto; }
+  .canvas-block:hover { transform: none; }
+}
+
+/* ===== Loaded-context strip (shows above canvas when a bank entry is open) ===== */
+.loaded-context { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 10px 14px; padding: 12px 22px; background: #FFFFFF; border-bottom: 1px solid rgba(11, 21, 48, 0.10); }
+.loaded-context[hidden] { display: none; }
+.loaded-context .lc-main { min-width: 0; }
+.loaded-context .lc-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.loaded-context .lc-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; color: #8B3A2E; }
+.loaded-context .lc-title { font-size: 15px; font-weight: 800; color: #0B1530; }
+.loaded-context .lc-notes { margin: 4px 0 0; font-size: 13px; color: #0B1530; line-height: 1.5; opacity: 0.84; }
+.loaded-context .lc-source { margin: 4px 0 0; font-size: 11.5px; color: #0B1530; opacity: 0.62; }
+.loaded-context .lc-close { background: transparent; border: none; color: #0B1530; opacity: 0.55; cursor: pointer; font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; padding: 6px 8px; border-radius: 4px; }
+.loaded-context .lc-close:hover { opacity: 1; color: #8B3A2E; background: #FAFAF9; }
+
+.dok-chip { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; background: #FAFAF9; border: 1px solid rgba(11, 21, 48, 0.20); color: #0B1530; }
+.dok-chip.dok-1 { background: #EDF1F3; border-color: rgba(11, 21, 48, 0.20); }
+.dok-chip.dok-2 { background: #F5E9D8; border-color: #C9A14A; }
+.dok-chip.dok-3 { background: #F1E1D9; border-color: #C2734D; color: #8B3A2E; }
+.dok-chip.dok-4 { background: #8B3A2E; border-color: #8B3A2E; color: #FFFFFF; }
+
+/* ===== Save-to-bank button styling (toolbar) ===== */
+.action-btn.save-bank { background: #2A6F7A; color: #FFFFFF; border-color: #2A6F7A; }
+.action-btn.save-bank:hover { background: #225A63; border-color: #225A63; color: #FFFFFF; }
+.action-btn.save-bank:disabled { background: #FAFAF9; color: rgba(11, 21, 48, 0.4); border-color: rgba(11, 21, 48, 0.18); cursor: not-allowed; }
+
+/* ===== BANK / INDEX ===== */
+.bank { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 10px; box-shadow: 0 1px 3px rgba(11, 21, 48, 0.06); margin-top: 22px; }
+.bank-header { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; padding: 16px 22px; background: #FAFAF9; border-bottom: 1px solid rgba(11, 21, 48, 0.14); }
+.bank-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; color: #0B1530; opacity: 0.62; margin: 0 0 4px; }
+.bank-title { font-size: clamp(16px, 2vw, 20px); font-weight: 800; color: #0B1530; margin: 0; }
+.bank-count { font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: #8B3A2E; margin-left: 8px; }
+.bank-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.bank-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 22px; background: #FFFFFF; border-bottom: 1px solid rgba(11, 21, 48, 0.10); }
+.bank-search { flex: 1 1 220px; position: relative; }
+.bank-search input { width: 100%; padding: 9px 12px 9px 34px; border: 1px solid rgba(11, 21, 48, 0.20); border-radius: 4px; font-family: inherit; font-size: 13.5px; color: #0B1530; background: #FAFAF9; }
+.bank-search input:focus { outline: none; border-color: #8B3A2E; background: #FFFFFF; }
+.bank-search::before { content: ""; position: absolute; left: 12px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border: 2px solid rgba(11, 21, 48, 0.45); border-radius: 50%; }
+.bank-search::after { content: ""; position: absolute; left: 22px; top: 50%; width: 6px; height: 2px; margin-top: 2px; background: rgba(11, 21, 48, 0.45); transform: rotate(45deg); transform-origin: left center; }
+
+.bank-filter { display: flex; align-items: center; gap: 6px; }
+.bank-filter label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #0B1530; opacity: 0.6; }
+.bank-filter select { padding: 8px 10px; border: 1px solid rgba(11, 21, 48, 0.20); border-radius: 4px; font-family: inherit; font-size: 12.5px; color: #0B1530; background: #FFFFFF; cursor: pointer; }
+.bank-filter select:focus { outline: none; border-color: #8B3A2E; }
+
+.bank-body { padding: 14px 22px 20px; }
+.bank-empty { text-align: center; padding: 32px 16px; color: #0B1530; opacity: 0.6; }
+.bank-empty-title { font-size: 14px; font-weight: 800; letter-spacing: 0.02em; margin: 0 0 6px; }
+.bank-empty-sub { font-size: 12.5px; line-height: 1.5; max-width: 420px; margin: 0 auto; }
+
+.bank-module { margin-bottom: 18px; border: 1px solid rgba(11, 21, 48, 0.10); border-radius: 8px; overflow: hidden; }
+.bank-module:last-child { margin-bottom: 0; }
+.bank-module-header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 10px 14px; background: #FAFAF9; cursor: pointer; border: none; width: 100%; text-align: left; font-family: inherit; }
+.bank-module-header:hover { background: #FFFFFF; }
+.bank-module-caret { display: inline-block; width: 10px; height: 10px; border-right: 2px solid #8B3A2E; border-bottom: 2px solid #8B3A2E; transform: rotate(45deg); transition: transform 200ms ease; }
+.bank-module[data-collapsed="true"] .bank-module-caret { transform: rotate(-45deg); }
+.bank-module[data-collapsed="true"] .bank-entries { display: none; }
+.bank-module-name { font-size: 13px; font-weight: 800; color: #0B1530; letter-spacing: 0.02em; }
+.bank-module-count { font-size: 10.5px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: #8B3A2E; }
+
+.bank-entries { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; padding: 12px; background: #FFFFFF; }
+.bank-entry { display: grid; grid-template-rows: auto 1fr auto; gap: 8px; padding: 12px; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 8px; background: #FFFFFF; transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease; }
+.bank-entry:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(11, 21, 48, 0.10); border-color: #C9A14A; }
+.bank-entry-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.bank-entry-thumb { position: relative; aspect-ratio: 4 / 3; background: #060A18; border-radius: 4px; overflow: hidden; }
+.bank-entry-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.bank-entry-thumb-label { position: absolute; left: 4px; top: 4px; padding: 1px 6px; font-size: 8.5px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; background: rgba(11, 21, 48, 0.78); color: #FAFAF9; border-radius: 3px; }
+.bank-entry-meta { min-width: 0; }
+.bank-entry-title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 4px; }
+.bank-entry-title { font-size: 13.5px; font-weight: 800; color: #0B1530; line-height: 1.3; }
+.bank-entry-notes { font-size: 12px; color: #0B1530; opacity: 0.72; line-height: 1.45; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.bank-entry-source { font-size: 10.5px; color: #0B1530; opacity: 0.5; margin: 4px 0 0; }
+.bank-entry-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.bank-entry-actions button { flex: 1 1 auto; min-width: 0; padding: 6px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid rgba(11, 21, 48, 0.20); border-radius: 4px; background: #FFFFFF; color: #0B1530; cursor: pointer; font-family: inherit; }
+.bank-entry-actions button:hover { border-color: #8B3A2E; color: #8B3A2E; }
+.bank-entry-actions button.primary { background: #0B1530; color: #FFFFFF; border-color: #0B1530; }
+.bank-entry-actions button.primary:hover { background: #142A36; color: #FFFFFF; border-color: #142A36; }
+.bank-entry-actions button.danger:hover { border-color: #C0392B; color: #C0392B; }
+
+/* ===== Modal dialog (save / load-prompt) ===== */
+dialog.atlas-dialog { padding: 0; border: none; border-radius: 10px; max-width: 520px; width: calc(100% - 32px); box-shadow: 0 18px 48px rgba(11, 21, 48, 0.22); background: #FFFFFF; color: #0B1530; }
+dialog.atlas-dialog::backdrop { background: rgba(11, 21, 48, 0.42); }
+dialog.atlas-dialog .dlg-header { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 10px; padding: 16px 20px; border-bottom: 1px solid rgba(11, 21, 48, 0.10); background: #FAFAF9; border-radius: 10px 10px 0 0; }
+dialog.atlas-dialog .dlg-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #8B3A2E; margin: 0 0 4px; }
+dialog.atlas-dialog .dlg-title { font-size: 17px; font-weight: 800; color: #0B1530; margin: 0; line-height: 1.2; }
+dialog.atlas-dialog .dlg-close { background: transparent; border: none; cursor: pointer; padding: 6px 8px; border-radius: 4px; font-size: 16px; line-height: 1; color: #0B1530; opacity: 0.6; }
+dialog.atlas-dialog .dlg-close:hover { opacity: 1; color: #8B3A2E; }
+dialog.atlas-dialog .dlg-body { padding: 16px 20px; }
+dialog.atlas-dialog .dlg-message { font-size: 13.5px; line-height: 1.55; color: #0B1530; opacity: 0.86; margin: 0 0 8px; }
+dialog.atlas-dialog .dlg-field { display: grid; gap: 5px; margin-bottom: 12px; }
+dialog.atlas-dialog .dlg-field label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #0B1530; opacity: 0.72; }
+dialog.atlas-dialog .dlg-field input, dialog.atlas-dialog .dlg-field select, dialog.atlas-dialog .dlg-field textarea { width: 100%; padding: 9px 11px; border: 1px solid rgba(11, 21, 48, 0.22); border-radius: 4px; font-family: inherit; font-size: 14px; color: #0B1530; background: #FFFFFF; }
+dialog.atlas-dialog .dlg-field input:focus, dialog.atlas-dialog .dlg-field select:focus, dialog.atlas-dialog .dlg-field textarea:focus { outline: none; border-color: #8B3A2E; box-shadow: 0 0 0 3px rgba(139, 58, 46, 0.18); }
+dialog.atlas-dialog .dlg-field textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+dialog.atlas-dialog .dlg-field .dlg-hint { font-size: 11.5px; color: #0B1530; opacity: 0.6; font-weight: 400; letter-spacing: 0; text-transform: none; }
+dialog.atlas-dialog .dlg-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+dialog.atlas-dialog .dlg-thumb { aspect-ratio: 4 / 3; background: #060A18; border-radius: 6px; position: relative; overflow: hidden; }
+dialog.atlas-dialog .dlg-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+dialog.atlas-dialog .dlg-thumb-label { position: absolute; left: 6px; top: 6px; padding: 2px 7px; font-size: 9px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; background: rgba(11, 21, 48, 0.80); color: #FAFAF9; border-radius: 3px; }
+dialog.atlas-dialog .dlg-footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 12px 20px 16px; border-top: 1px solid rgba(11, 21, 48, 0.10); background: #FFFFFF; border-radius: 0 0 10px 10px; }
+dialog.atlas-dialog .dlg-footer button { padding: 9px 16px; border-radius: 4px; font-family: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border: 1px solid rgba(11, 21, 48, 0.22); background: #FFFFFF; color: #0B1530; }
+dialog.atlas-dialog .dlg-footer button:hover { border-color: #8B3A2E; color: #8B3A2E; }
+dialog.atlas-dialog .dlg-footer button.primary { background: #8B3A2E; color: #FFFFFF; border-color: #8B3A2E; }
+dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; color: #FFFFFF; border-color: #A0452F; }
+
+@media (max-width: 560px) {
+  .bank-entries { grid-template-columns: 1fr; }
+  .bank-controls { padding: 10px 14px; }
+  .bank-body { padding: 12px 14px 16px; }
+}
+</style>
+</head>
+<body>
+<a href="#workspace" class="skip-link">Skip to coloring book workspace</a>
+
+<header class="site-header">
+  <a href="index.html" class="site-logo" target="_top" aria-label="BIO 004 course home">
+    <svg viewBox="40 10 125 148" role="img" aria-hidden="true" focusable="false">
+      <g transform="translate(0, 18)">
+        <g transform="translate(60, 0) rotate(8 0 130)"><circle cx="0" cy="20" r="10" fill="#0B1530"/><path d="M 0,32 C -10,32 -16,36 -16,42 C -16,55 -13,68 -11,82 C -10,100 -12,118 -14,130 L 14,130 C 12,118 10,100 11,82 C 13,68 16,55 16,42 C 16,36 10,32 0,32 Z" fill="#0B1530"/></g>
+        <g transform="translate(100, 0)"><circle cx="0" cy="10" r="11" fill="#8B3A2E"/><path d="M 0,22 C -11,22 -17,26 -17,34 C -17,52 -14,70 -12,86 C -11,108 -13,122 -15,132 L 15,132 C 13,122 11,108 12,86 C 14,70 17,52 17,34 C 17,26 11,22 0,22 Z" fill="#8B3A2E"/></g>
+        <g transform="translate(140, 0) rotate(-8 0 130)"><circle cx="0" cy="20" r="10" fill="#C9A14A"/><path d="M 0,32 C -10,32 -16,36 -16,42 C -16,55 -13,68 -11,82 C -10,100 -12,118 -14,130 L 14,130 C 12,118 10,100 11,82 C 13,68 16,55 16,42 C 16,36 10,32 0,32 Z" fill="#C9A14A"/></g>
+      </g>
+    </svg>
+    <span class="logo-text"><span class="logo-title">Human <span class="logo-accent">Anatomy</span></span><span class="logo-sub">BIO 004 &middot; Solano Community College</span></span>
+  </a>
+</header>
+
+<section class="lecture-hero" aria-labelledby="tool-title">
+  <div class="hero-eyebrow">BIO 004 &middot; Human Anatomy &middot; MedMasters Collaborative</div>
+  <h1 id="tool-title" class="hero-headline">Atlas Coloring <span class="accent">Book</span>.</h1>
+  <p class="hero-subhead">Upload an unlabeled atlas image, color in your labels by hand, then flip to the answer key to compare. Build your own book one page at a time: save each pair to your library, group it by module, and shuffle through random pages when it is time to drill. Drawing utensils tuned for both light and dark backgrounds.</p>
+  <div class="hero-actions">
+    <button type="button" id="savePNG">Save annotated PNG</button>
+    <button type="button" class="ghost" id="clearDraw">Clear my labels</button>
+    <button type="button" class="ghost" id="resetAll">Reset session</button>
+    <button type="button" class="ghost" id="jumpBank">Jump to my book</button>
+  </div>
+</section>
+
+<main class="workspace" id="workspace" aria-label="Atlas labeling workspace">
+
+  <section class="setup" aria-labelledby="setup-title">
+    <h2 id="setup-title">Step 1 &middot; Load your images</h2>
+    <div class="setup-grid">
+
+      <label class="drop-zone" id="dropPractice" data-role="practice" aria-label="Upload the unlabeled practice image">
+        <span class="drop-zone-eyebrow">Practice image</span>
+        <span class="drop-zone-title" data-default-title>Drop unlabeled image here</span>
+        <span class="drop-zone-hint" data-default-hint>or click to browse &middot; PNG, JPG, SVG</span>
+        <input type="file" accept="image/*" id="filePractice" aria-label="Practice image file">
+      </label>
+
+      <label class="drop-zone" id="dropKey" data-role="key" aria-label="Upload the labeled answer-key image">
+        <span class="drop-zone-eyebrow">Answer key</span>
+        <span class="drop-zone-title" data-default-title>Drop labeled key here</span>
+        <span class="drop-zone-hint" data-default-hint>or click to browse &middot; this one stays hidden until you toggle</span>
+        <input type="file" accept="image/*" id="fileKey" aria-label="Answer key file">
+      </label>
+
+    </div>
+  </section>
+
+  <article class="canvas-block" aria-labelledby="canvas-title">
+    <header class="canvas-header">
+      <div>
+        <p class="canvas-eyebrow">Step 2 &middot; Label freehand</p>
+        <h2 id="canvas-title" class="canvas-title">Drawing Canvas</h2>
+      </div>
+      <span class="canvas-mode-pill" id="modePill" aria-live="polite">Practice mode</span>
+    </header>
+
+    <div class="canvas-toolbar" role="toolbar" aria-label="Drawing tools">
+
+      <div class="tool-group" aria-label="Pen color">
+        <span class="tool-label">Pen</span>
+        <button type="button" class="swatch magenta is-active" data-color="#FF2D87" aria-label="Pen color magenta" aria-pressed="true"></button>
+        <button type="button" class="swatch cyan"    data-color="#00E5FF" aria-label="Pen color cyan"></button>
+        <button type="button" class="swatch lime"    data-color="#B6FF1F" aria-label="Pen color lime"></button>
+        <button type="button" class="swatch yellow"  data-color="#FFE600" aria-label="Pen color yellow"></button>
+        <button type="button" class="swatch orange"  data-color="#FF7A1A" aria-label="Pen color orange"></button>
+        <button type="button" class="swatch violet"  data-color="#B26BFF" aria-label="Pen color violet"></button>
+        <button type="button" class="swatch crimson" data-color="#C0392B" aria-label="Pen color crimson, for light backgrounds"></button>
+        <button type="button" class="swatch blue"    data-color="#1F5BB8" aria-label="Pen color blue, for light backgrounds"></button>
+        <button type="button" class="swatch forest"  data-color="#1F7A3A" aria-label="Pen color forest green, for light backgrounds"></button>
+        <button type="button" class="swatch navy"    data-color="#0B1530" aria-label="Pen color navy, for light backgrounds"></button>
+        <button type="button" class="swatch white"   data-color="#FFFFFF" aria-label="Pen color white, for dark backgrounds"></button>
+      </div>
+
+      <div class="tool-group" aria-label="Pen size">
+        <span class="tool-label">Size</span>
+        <button type="button" class="size-btn" data-size="2"  aria-label="Pen size fine"><span class="dot"></span></button>
+        <button type="button" class="size-btn is-active" data-size="4"  aria-label="Pen size medium"><span class="dot"></span></button>
+        <button type="button" class="size-btn" data-size="8"  aria-label="Pen size bold"><span class="dot"></span></button>
+        <button type="button" class="size-btn" data-size="14" aria-label="Pen size marker"><span class="dot"></span></button>
+      </div>
+
+      <div class="tool-group" aria-label="Drawing actions">
+        <button type="button" class="action-btn" id="eraserBtn" aria-pressed="false">Eraser<span class="kbd">E</span></button>
+        <button type="button" class="action-btn" id="undoBtn">Undo<span class="kbd">U</span></button>
+        <button type="button" class="action-btn" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="tool-group" aria-label="Background">
+        <span class="tool-label">Bg</span>
+        <div class="bg-toggle-group" role="group" aria-label="Canvas background tone">
+          <button type="button" class="is-active" data-bg="light" aria-pressed="true">Light</button>
+          <button type="button" data-bg="dark" aria-pressed="false">Dark</button>
+        </div>
+        <button type="button" class="action-btn" id="gridBtn" aria-pressed="false" style="margin-left:6px;">Grid</button>
+      </div>
+
+      <div class="tool-group" aria-label="Answer key">
+        <button type="button" class="action-btn key-toggle" id="keyToggleBtn" aria-pressed="false" disabled>Show key<span class="kbd">K</span></button>
+      </div>
+
+      <div class="tool-group" aria-label="Coloring book">
+        <button type="button" class="action-btn save-bank" id="saveBankBtn" disabled>Save this page<span class="kbd">B</span></button>
+      </div>
+
+    </div>
+
+    <aside class="loaded-context" id="loadedContext" hidden aria-live="polite">
+      <div class="lc-main">
+        <div class="lc-title-row">
+          <span class="lc-eyebrow" id="lcModule">Module</span>
+          <span class="lc-title" id="lcTitle">Title</span>
+          <span class="dok-chip" id="lcDok" hidden>DOK</span>
+        </div>
+        <p class="lc-notes" id="lcNotes" hidden></p>
+        <p class="lc-source" id="lcSource" hidden></p>
+      </div>
+      <button type="button" class="lc-close" id="lcClose" aria-label="Close loaded entry info">Dismiss</button>
+    </aside>
+
+    <div class="canvas-col" data-slide-title="atlas-labeling-practice">
+      <div class="canvas-wrap is-grid" id="canvasWrap">
+        <img class="canvas-image is-hidden" id="practiceImg" alt="" aria-hidden="true">
+        <img class="canvas-image is-hidden" id="keyImg" alt="" aria-hidden="true">
+        <canvas class="draw-canvas" id="drawCanvas" role="img" aria-label="Labeling canvas"></canvas>
+        <div class="canvas-empty" id="canvasEmpty" aria-hidden="true">
+          <span class="canvas-empty-title">No image loaded yet</span>
+          <span class="canvas-empty-sub">Drop an unlabeled atlas image above to start labeling. The canvas works without an image too, if you just want a blank scratch space.</span>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <section class="keyboard-help" aria-labelledby="kb-title">
+    <h2 id="kb-title">Keyboard shortcuts</h2>
+    <div class="kb-grid">
+      <div class="kb-row"><span class="kb-key">K</span><span>Toggle answer key</span></div>
+      <div class="kb-row"><span class="kb-key">E</span><span>Eraser on/off</span></div>
+      <div class="kb-row"><span class="kb-key">U</span><span>Undo last stroke</span></div>
+      <div class="kb-row"><span class="kb-key">D</span><span>Dark / light background</span></div>
+      <div class="kb-row"><span class="kb-key">G</span><span>Grid on/off</span></div>
+      <div class="kb-row"><span class="kb-key">1</span>&ndash;<span class="kb-key">9</span>&nbsp;<span class="kb-key">0</span><span>Pick pen color (white = click only)</span></div>
+      <div class="kb-row"><span class="kb-key">[</span>&nbsp;<span class="kb-key">]</span><span>Pen smaller / bigger</span></div>
+      <div class="kb-row"><span class="kb-key">S</span><span>Save annotated PNG</span></div>
+      <div class="kb-row"><span class="kb-key">B</span><span>Save current pair as a page</span></div>
+      <div class="kb-row"><span class="kb-key">R</span><span>Shuffle a page (uses current filters)</span></div>
+    </div>
+  </section>
+
+  <section class="bank" id="bank" aria-labelledby="bank-title">
+    <header class="bank-header">
+      <div>
+        <p class="bank-eyebrow">Step 3 &middot; Your library, page by page</p>
+        <h2 id="bank-title" class="bank-title">My coloring book<span class="bank-count" id="bankCount">(0)</span></h2>
+      </div>
+      <div class="bank-actions">
+        <button type="button" class="action-btn primary" id="randomizeBtn" disabled>Shuffle a page<span class="kbd">R</span></button>
+        <button type="button" class="action-btn" id="exportBankBtn">Export book</button>
+        <button type="button" class="action-btn" id="importBankBtn">Import book</button>
+        <input type="file" id="importBankFile" accept="application/json" hidden>
+      </div>
+    </header>
+    <div class="bank-controls">
+      <label class="bank-search">
+        <span class="visually-hidden" style="position:absolute;left:-9999px;">Search book by title or notes</span>
+        <input type="search" id="bankSearch" placeholder="Search by title or notes" aria-label="Search book by title or notes">
+      </label>
+      <div class="bank-filter">
+        <label for="bankModuleFilter">Module</label>
+        <select id="bankModuleFilter" aria-label="Filter book by module">
+          <option value="">All modules</option>
+        </select>
+      </div>
+      <div class="bank-filter">
+        <label for="bankDokFilter">DOK</label>
+        <select id="bankDokFilter" aria-label="Filter book by DOK level">
+          <option value="">All levels</option>
+          <option value="1">DOK 1</option>
+          <option value="2">DOK 2</option>
+          <option value="3">DOK 3</option>
+          <option value="4">DOK 4</option>
+        </select>
+      </div>
+    </div>
+    <div class="bank-body" id="bankBody" aria-live="polite">
+      <div class="bank-empty" id="bankEmpty">
+        <p class="bank-empty-title">No pages yet</p>
+        <p class="bank-empty-sub">Load a practice image plus an answer key, then click <strong>Save this page</strong> in the toolbar to start your book. Pages you save here are stored on this device and grouped by module in this index.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<datalist id="moduleSuggestions">
+  <option value="Introduction &amp; Histology"></option>
+  <option value="Integumentary System"></option>
+  <option value="Skeletal System"></option>
+  <option value="Muscular System"></option>
+  <option value="Nervous System"></option>
+  <option value="Special Senses"></option>
+  <option value="Endocrine System"></option>
+  <option value="Cardiovascular System"></option>
+  <option value="Lymphatic &amp; Immune"></option>
+  <option value="Respiratory System"></option>
+  <option value="Digestive System"></option>
+  <option value="Urinary System"></option>
+  <option value="Reproductive System"></option>
+</datalist>
+
+<dialog class="atlas-dialog" id="saveDialog" aria-labelledby="saveDialogTitle">
+  <form id="saveForm" method="dialog">
+    <header class="dlg-header">
+      <div>
+        <p class="dlg-eyebrow">Coloring book page</p>
+        <h2 class="dlg-title" id="saveDialogTitle">Save this page</h2>
+      </div>
+      <button type="button" class="dlg-close" aria-label="Close save dialog" data-dlg-close>&times;</button>
+    </header>
+    <div class="dlg-body">
+      <div class="dlg-thumbs" aria-hidden="true">
+        <div class="dlg-thumb"><span class="dlg-thumb-label">Practice</span><img id="saveThumbPractice" alt=""></div>
+        <div class="dlg-thumb"><span class="dlg-thumb-label">Key</span><img id="saveThumbKey" alt=""></div>
+      </div>
+      <div class="dlg-field">
+        <label for="saveTitle">Title <span class="dlg-hint">(required)</span></label>
+        <input type="text" id="saveTitle" name="title" required maxlength="120" autocomplete="off" placeholder="e.g., Cardiac muscle histology, longitudinal section">
+      </div>
+      <div class="dlg-field">
+        <label for="saveModule">Module <span class="dlg-hint">(type or pick a suggestion)</span></label>
+        <input type="text" id="saveModule" name="module" list="moduleSuggestions" maxlength="80" autocomplete="off" placeholder="e.g., Muscular System">
+      </div>
+      <div class="dlg-field">
+        <label for="saveNotes">Notes / study prompt <span class="dlg-hint">(optional, shown above the canvas when loaded)</span></label>
+        <textarea id="saveNotes" name="notes" maxlength="500" placeholder="e.g., Label A-band, I-band, Z-line, sarcomere, M-line."></textarea>
+      </div>
+      <div class="dlg-field">
+        <label for="saveDok">DOK level <span class="dlg-hint">(optional, 1 = recall, 4 = extended thinking)</span></label>
+        <select id="saveDok" name="dok">
+          <option value="">No level set</option>
+          <option value="1">DOK 1 &middot; Recall &amp; reproduce</option>
+          <option value="2">DOK 2 &middot; Skills &amp; concepts</option>
+          <option value="3">DOK 3 &middot; Strategic thinking</option>
+          <option value="4">DOK 4 &middot; Extended thinking</option>
+        </select>
+      </div>
+      <div class="dlg-field">
+        <label for="saveSource">Source citation <span class="dlg-hint">(optional, e.g., OpenStax &sect;10.3)</span></label>
+        <input type="text" id="saveSource" name="source" maxlength="200" autocomplete="off" placeholder="e.g., OpenStax Anatomy &amp; Physiology 2e, &sect;10.3">
+      </div>
+    </div>
+    <footer class="dlg-footer">
+      <button type="button" data-dlg-close>Cancel</button>
+      <button type="submit" class="primary" id="saveSubmit">Save page</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog class="atlas-dialog" id="loadPromptDialog" aria-labelledby="loadPromptTitle">
+  <header class="dlg-header">
+    <div>
+      <p class="dlg-eyebrow">Heads up</p>
+      <h2 class="dlg-title" id="loadPromptTitle">You have labels on the canvas</h2>
+    </div>
+    <button type="button" class="dlg-close" aria-label="Close" data-dlg-close>&times;</button>
+  </header>
+  <div class="dlg-body">
+    <p class="dlg-message">Loading <strong id="loadPromptEntryTitle">this entry</strong> will replace the practice and key images. Want to keep your current labels on top, or start with a clean canvas?</p>
+  </div>
+  <footer class="dlg-footer">
+    <button type="button" data-dlg-close>Cancel</button>
+    <button type="button" id="loadKeepBtn">Keep my labels</button>
+    <button type="button" class="primary" id="loadFreshBtn">Start fresh</button>
+  </footer>
+</dialog>
+
+<footer class="footer-section">
+  <p class="footer-byline">Dr. Sharilyn Rennie</p>
+  <p class="footer-meta">BIO 004 &middot; Atlas Coloring Book &middot; Built for the Digital Human Anatomy Atlas</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- State ----
+  var COLORS = ['#FF2D87','#00E5FF','#B6FF1F','#FFE600','#FF7A1A','#B26BFF','#C0392B','#1F5BB8','#1F7A3A','#0B1530','#FFFFFF'];
+  var SIZES = [2, 4, 8, 14];
+  var state = {
+    color: COLORS[0],
+    size: SIZES[1],
+    erasing: false,
+    strokes: [],
+    currentStroke: null,
+    dpr: window.devicePixelRatio || 1,
+    practiceURL: null,
+    keyURL: null,
+    showingKey: false,
+    bgDark: false
+  };
+
+  // ---- DOM refs ----
+  var wrap         = document.getElementById('canvasWrap');
+  var canvas       = document.getElementById('drawCanvas');
+  var ctx          = canvas.getContext('2d');
+  var practiceImg  = document.getElementById('practiceImg');
+  var keyImg       = document.getElementById('keyImg');
+  var emptyMsg     = document.getElementById('canvasEmpty');
+  var modePill     = document.getElementById('modePill');
+  var keyToggleBtn = document.getElementById('keyToggleBtn');
+  var eraserBtn    = document.getElementById('eraserBtn');
+  var undoBtn      = document.getElementById('undoBtn');
+  var clearBtn     = document.getElementById('clearBtn');
+  var gridBtn      = document.getElementById('gridBtn');
+  var savePNGBtn   = document.getElementById('savePNG');
+  var clearDrawBtn = document.getElementById('clearDraw');
+  var resetAllBtn  = document.getElementById('resetAll');
+
+  // ---- Color & size buttons ----
+  document.querySelectorAll('.swatch[data-color]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      state.color = btn.getAttribute('data-color');
+      state.erasing = false;
+      document.querySelectorAll('.swatch').forEach(function (b) {
+        b.classList.remove('is-active');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-pressed', 'true');
+      eraserBtn.classList.remove('is-active');
+      eraserBtn.setAttribute('aria-pressed', 'false');
+      wrap.classList.remove('is-erasing');
+    });
+  });
+
+  document.querySelectorAll('.size-btn[data-size]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      state.size = parseInt(btn.getAttribute('data-size'), 10);
+      document.querySelectorAll('.size-btn').forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+    });
+  });
+
+  // ---- Background toggle ----
+  document.querySelectorAll('.bg-toggle-group button[data-bg]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      setBackground(btn.getAttribute('data-bg'));
+    });
+  });
+  function setBackground(mode) {
+    state.bgDark = (mode === 'dark');
+    wrap.classList.toggle('is-dark', state.bgDark);
+    document.querySelectorAll('.bg-toggle-group button[data-bg]').forEach(function (b) {
+      var on = b.getAttribute('data-bg') === mode;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  // ---- Grid toggle ----
+  gridBtn.addEventListener('click', function () {
+    var on = !wrap.classList.contains('is-grid');
+    wrap.classList.toggle('is-grid', on);
+    gridBtn.classList.toggle('is-active', on);
+    gridBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+
+  // ---- Eraser / Undo / Clear ----
+  eraserBtn.addEventListener('click', function () {
+    state.erasing = !state.erasing;
+    eraserBtn.classList.toggle('is-active', state.erasing);
+    eraserBtn.setAttribute('aria-pressed', state.erasing ? 'true' : 'false');
+    wrap.classList.toggle('is-erasing', state.erasing);
+  });
+  undoBtn.addEventListener('click', undo);
+  clearBtn.addEventListener('click', function () {
+    if (state.strokes.length === 0) return;
+    if (confirm('Clear your labels from the canvas?')) { state.strokes = []; redraw(); }
+  });
+  clearDrawBtn.addEventListener('click', function () {
+    if (state.strokes.length === 0) return;
+    if (confirm('Clear your labels from the canvas?')) { state.strokes = []; redraw(); }
+  });
+
+  // ---- Reset session (canvas only, does NOT touch the bank) ----
+  resetAllBtn.addEventListener('click', function () {
+    if (!confirm('Reset this canvas session: clear labels and remove the currently loaded images?\n\nYour saved bank entries stay safe.')) return;
+    state.strokes = [];
+    clearImage('practice');
+    clearImage('key');
+    redraw();
+    if (window.atlasBank && typeof window.atlasBank.dismissLoadedContext === 'function') {
+      window.atlasBank.dismissLoadedContext();
+    }
+  });
+
+  // ---- Drop zones / file inputs ----
+  setupDropZone('dropPractice', 'filePractice', 'practice');
+  setupDropZone('dropKey',      'fileKey',      'key');
+
+  function setupDropZone(zoneId, inputId, role) {
+    var zone = document.getElementById(zoneId);
+    var input = document.getElementById(inputId);
+    ['dragenter','dragover'].forEach(function (ev) {
+      zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('is-hover'); });
+    });
+    ['dragleave','drop'].forEach(function (ev) {
+      zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('is-hover'); });
+    });
+    zone.addEventListener('drop', function (e) {
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) loadImageFile(f, role);
+    });
+    input.addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (f) loadImageFile(f, role);
+      e.target.value = '';
+    });
+  }
+
+  function loadImageFile(file, role) {
+    if (!file.type || file.type.indexOf('image/') !== 0) {
+      alert('Please upload an image file (PNG, JPG, SVG, etc.)');
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      setImage(role, ev.target.result, file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function setImage(role, dataURL, fileName) {
+    if (role === 'practice') {
+      state.practiceURL = dataURL;
+      practiceImg.src = dataURL;
+      if (!state.showingKey) practiceImg.classList.remove('is-hidden');
+      decorateDropZone('dropPractice', fileName, dataURL);
+    } else {
+      state.keyURL = dataURL;
+      keyImg.src = dataURL;
+      if (state.showingKey) keyImg.classList.remove('is-hidden');
+      decorateDropZone('dropKey', fileName, dataURL);
+      keyToggleBtn.disabled = false;
+    }
+    refreshEmptyMessage();
+    updateSaveBankBtn();
+  }
+
+  function updateSaveBankBtn() {
+    var btn = document.getElementById('saveBankBtn');
+    if (!btn) return;
+    btn.disabled = !(state.practiceURL && state.keyURL);
+  }
+
+  function clearImage(role) {
+    if (role === 'practice') {
+      state.practiceURL = null;
+      practiceImg.removeAttribute('src');
+      practiceImg.classList.add('is-hidden');
+      resetDropZone('dropPractice');
+    } else {
+      state.keyURL = null;
+      keyImg.removeAttribute('src');
+      keyImg.classList.add('is-hidden');
+      resetDropZone('dropKey');
+      keyToggleBtn.disabled = true;
+      if (state.showingKey) toggleKey(false);
+    }
+    refreshEmptyMessage();
+    updateSaveBankBtn();
+  }
+
+  function decorateDropZone(zoneId, fileName, dataURL) {
+    var zone = document.getElementById(zoneId);
+    zone.classList.add('is-filled');
+    var titleEl = zone.querySelector('[data-default-title]');
+    var hintEl  = zone.querySelector('[data-default-hint]');
+    if (titleEl) titleEl.textContent = fileName || 'Image loaded';
+    if (hintEl) hintEl.textContent = 'Click to replace or drag a different file';
+
+    var oldThumb = zone.querySelector('.drop-zone-thumb');
+    if (oldThumb) oldThumb.remove();
+    var thumb = document.createElement('img');
+    thumb.className = 'drop-zone-thumb';
+    thumb.src = dataURL;
+    thumb.alt = '';
+    zone.insertBefore(thumb, zone.firstChild);
+
+    var oldStatus = zone.querySelector('.drop-zone-status');
+    if (oldStatus) oldStatus.remove();
+    var status = document.createElement('span');
+    status.className = 'drop-zone-status';
+    status.textContent = (zoneId === 'dropKey') ? 'Key loaded' : 'Practice loaded';
+    zone.appendChild(status);
+
+    var oldClear = zone.querySelector('.drop-zone-clear');
+    if (oldClear) oldClear.remove();
+    var clearLink = document.createElement('button');
+    clearLink.type = 'button';
+    clearLink.className = 'drop-zone-clear';
+    clearLink.textContent = 'Remove';
+    clearLink.setAttribute('aria-label', 'Remove ' + (zoneId === 'dropKey' ? 'answer key' : 'practice image'));
+    clearLink.addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      clearImage(zoneId === 'dropKey' ? 'key' : 'practice');
+    });
+    zone.appendChild(clearLink);
+  }
+
+  function resetDropZone(zoneId) {
+    var zone = document.getElementById(zoneId);
+    zone.classList.remove('is-filled');
+    var thumb = zone.querySelector('.drop-zone-thumb'); if (thumb) thumb.remove();
+    var status = zone.querySelector('.drop-zone-status'); if (status) status.remove();
+    var clearLink = zone.querySelector('.drop-zone-clear'); if (clearLink) clearLink.remove();
+    var titleEl = zone.querySelector('[data-default-title]');
+    var hintEl  = zone.querySelector('[data-default-hint]');
+    if (zoneId === 'dropPractice') {
+      if (titleEl) titleEl.textContent = 'Drop unlabeled image here';
+      if (hintEl) hintEl.textContent = 'or click to browse · PNG, JPG, SVG';
+    } else {
+      if (titleEl) titleEl.textContent = 'Drop labeled key here';
+      if (hintEl) hintEl.textContent = 'or click to browse · this one stays hidden until you toggle';
+    }
+  }
+
+  function refreshEmptyMessage() {
+    var hasAny = !!state.practiceURL || !!state.keyURL;
+    emptyMsg.style.display = hasAny ? 'none' : '';
+  }
+
+  // ---- Key toggle ----
+  keyToggleBtn.addEventListener('click', function () { toggleKey(); });
+  function toggleKey(force) {
+    if (typeof force === 'boolean') state.showingKey = force;
+    else state.showingKey = !state.showingKey;
+
+    if (state.showingKey && !state.keyURL) { state.showingKey = false; return; }
+
+    if (state.showingKey) {
+      keyImg.classList.remove('is-hidden');
+      practiceImg.classList.add('is-hidden');
+      keyToggleBtn.textContent = 'Hide key';
+      keyToggleBtn.classList.add('is-active');
+      keyToggleBtn.setAttribute('aria-pressed', 'true');
+      modePill.textContent = 'Answer key';
+      modePill.classList.add('is-key');
+    } else {
+      keyImg.classList.add('is-hidden');
+      if (state.practiceURL) practiceImg.classList.remove('is-hidden');
+      keyToggleBtn.textContent = 'Show key';
+      keyToggleBtn.classList.remove('is-active');
+      keyToggleBtn.setAttribute('aria-pressed', 'false');
+      modePill.textContent = 'Practice mode';
+      modePill.classList.remove('is-key');
+    }
+    var kbd = document.createElement('span');
+    kbd.className = 'kbd'; kbd.textContent = 'K';
+    keyToggleBtn.appendChild(kbd);
+  }
+
+  // ---- Canvas sizing ----
+  function resize() {
+    var rect = wrap.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    state.dpr = dpr;
+    canvas.width  = Math.max(1, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    canvas.style.width  = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    redraw();
+  }
+  window.addEventListener('resize', resize);
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap);
+  resize();
+
+  // ---- Pointer drawing ----
+  function getXY(ev) {
+    var r = canvas.getBoundingClientRect();
+    return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+  }
+  canvas.addEventListener('pointerdown', function (ev) {
+    ev.preventDefault();
+    if (canvas.setPointerCapture) { try { canvas.setPointerCapture(ev.pointerId); } catch (e) {} }
+    var p = getXY(ev);
+    state.currentStroke = {
+      color: state.erasing ? null : state.color,
+      size: state.erasing ? Math.max(12, state.size * 4) : state.size,
+      erasing: state.erasing,
+      points: [p]
+    };
+    state.strokes.push(state.currentStroke);
+    drawStrokeSegment(state.currentStroke, 0);
+  });
+  canvas.addEventListener('pointermove', function (ev) {
+    if (!state.currentStroke) return;
+    ev.preventDefault();
+    var p = getXY(ev);
+    var s = state.currentStroke;
+    var prevIdx = s.points.length - 1;
+    s.points.push(p);
+    drawStrokeSegment(s, prevIdx);
+  });
+  function endStroke() { if (state.currentStroke) state.currentStroke = null; }
+  canvas.addEventListener('pointerup',     endStroke);
+  canvas.addEventListener('pointercancel', endStroke);
+  canvas.addEventListener('pointerleave',  endStroke);
+  canvas.addEventListener('touchstart', function (e) {
+    var t = e.touches && e.touches[0];
+    if (t && t.touchType === 'stylus') return;
+    e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchmove', function (e) {
+    var t = e.touches && e.touches[0];
+    if (t && t.touchType === 'stylus') return;
+    e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+  canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  function drawStrokeSegment(stroke, fromIdx) {
+    ctx.save();
+    if (stroke.erasing) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = 'rgba(0,0,0,1)';
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = stroke.color;
+    }
+    ctx.lineWidth = stroke.size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    var pts = stroke.points;
+    if (pts.length === 1) {
+      ctx.beginPath();
+      ctx.arc(pts[0].x, pts[0].y, Math.max(0.5, stroke.size / 2), 0, Math.PI * 2);
+      ctx.fillStyle = stroke.erasing ? 'rgba(0,0,0,1)' : stroke.color;
+      ctx.fill();
+    } else if (fromIdx < pts.length - 1) {
+      ctx.beginPath();
+      ctx.moveTo(pts[fromIdx].x, pts[fromIdx].y);
+      for (var i = fromIdx + 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function redraw() {
+    var r = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, r.width, r.height);
+    state.strokes.forEach(function (s) { drawStrokeSegment(s, 0); });
+  }
+
+  function undo() {
+    if (state.strokes.length === 0) return;
+    state.strokes.pop();
+    redraw();
+  }
+
+  // ---- Save PNG: composite current background image + drawing onto a single canvas ----
+  function savePNG() {
+    var r = wrap.getBoundingClientRect();
+    var dpr = state.dpr;
+    var out = document.createElement('canvas');
+    out.width  = Math.floor(r.width * dpr);
+    out.height = Math.floor(r.height * dpr);
+    var oc = out.getContext('2d');
+
+    // Background tone
+    oc.fillStyle = state.bgDark ? '#060A18' : '#FFFFFF';
+    oc.fillRect(0, 0, out.width, out.height);
+
+    // Pick whichever image is currently displayed
+    var bgImg = null;
+    if (state.showingKey && state.keyURL) bgImg = keyImg;
+    else if (!state.showingKey && state.practiceURL) bgImg = practiceImg;
+
+    if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+      var iw = bgImg.naturalWidth, ih = bgImg.naturalHeight;
+      var cw = out.width, ch = out.height;
+      var scale = Math.min(cw / iw, ch / ih);
+      var dw = iw * scale, dh = ih * scale;
+      var dx = (cw - dw) / 2, dy = (ch - dh) / 2;
+      oc.drawImage(bgImg, dx, dy, dw, dh);
+    }
+
+    // Drawing on top
+    oc.drawImage(canvas, 0, 0);
+
+    var link = document.createElement('a');
+    var tag = state.showingKey ? 'with-key' : 'practice';
+    link.download = 'atlas-coloring-book-' + tag + '-' + Date.now() + '.png';
+    link.href = out.toDataURL('image/png');
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  }
+  savePNGBtn.addEventListener('click', savePNG);
+
+  // ---- Keyboard shortcuts ----
+  document.addEventListener('keydown', function (e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    var k = e.key.toLowerCase();
+    if (k === 'k') { if (!keyToggleBtn.disabled) { toggleKey(); e.preventDefault(); } }
+    else if (k === 'e') { eraserBtn.click(); e.preventDefault(); }
+    else if (k === 'u') { undo(); e.preventDefault(); }
+    else if (k === 'd') { setBackground(state.bgDark ? 'light' : 'dark'); e.preventDefault(); }
+    else if (k === 'g') { gridBtn.click(); e.preventDefault(); }
+    else if (k === 's') { savePNG(); e.preventDefault(); }
+    else if (k === '[') {
+      var idx = SIZES.indexOf(state.size);
+      if (idx > 0) document.querySelector('.size-btn[data-size="' + SIZES[idx - 1] + '"]').click();
+      e.preventDefault();
+    }
+    else if (k === ']') {
+      var idx2 = SIZES.indexOf(state.size);
+      if (idx2 < SIZES.length - 1) document.querySelector('.size-btn[data-size="' + SIZES[idx2 + 1] + '"]').click();
+      e.preventDefault();
+    }
+    else if (/^[0-9]$/.test(k)) {
+      var swatches = document.querySelectorAll('.swatch[data-color]');
+      // 1..9 = first nine swatches, 0 = tenth swatch (navy)
+      var idx3 = (k === '0') ? 9 : (parseInt(k, 10) - 1);
+      if (swatches[idx3]) { swatches[idx3].click(); e.preventDefault(); }
+    }
+  });
+
+  refreshEmptyMessage();
+  updateSaveBankBtn();
+
+  // ---- Expose minimal API for the bank module ----
+  window.atlasAPI = {
+    getCurrentPair: function () {
+      return { practiceURL: state.practiceURL, keyURL: state.keyURL };
+    },
+    setPair: function (practiceURL, keyURL, opts) {
+      opts = opts || {};
+      // Reset key view first so toggle state lines up cleanly
+      if (state.showingKey) toggleKey(false);
+      setImage('practice', practiceURL, opts.titlePractice || 'practice-from-bank');
+      setImage('key',      keyURL,      opts.titleKey      || 'key-from-bank');
+    },
+    hasLabels: function () { return state.strokes.length > 0; },
+    clearLabels: function () { state.strokes = []; redraw(); },
+    triggerKeyToggle: function () { if (!keyToggleBtn.disabled) toggleKey(); },
+    saveBankBtn: function () { return document.getElementById('saveBankBtn'); }
+  };
+})();
+
+/* ===============================================================
+   BANK + INDEX MODULE
+   - IndexedDB persistence (atlasLabelingBank / pairs)
+   - Save dialog, render index, load with keep/fresh prompt
+   - Randomize, search, module + DOK filter
+   - Export / import as a single JSON file
+   - SAFE: Clear my labels and Reset session never touch the bank.
+   =============================================================== */
+(function () {
+  'use strict';
+  if (!window.indexedDB) {
+    console.warn('IndexedDB unavailable; bank disabled.');
+    return;
+  }
+
+  var DB_NAME = 'atlasLabelingBank';
+  var DB_VER  = 1;
+  var STORE   = 'pairs';
+  var EXPORT_VERSION = 1;
+
+  // ---- DOM ----
+  var saveBankBtn      = document.getElementById('saveBankBtn');
+  var saveDialog       = document.getElementById('saveDialog');
+  var saveForm         = document.getElementById('saveForm');
+  var saveTitle        = document.getElementById('saveTitle');
+  var saveModule       = document.getElementById('saveModule');
+  var saveNotes        = document.getElementById('saveNotes');
+  var saveDok          = document.getElementById('saveDok');
+  var saveSource       = document.getElementById('saveSource');
+  var saveThumbP       = document.getElementById('saveThumbPractice');
+  var saveThumbK       = document.getElementById('saveThumbKey');
+  var saveSubmit       = document.getElementById('saveSubmit');
+  var saveDialogTitle  = document.getElementById('saveDialogTitle');
+
+  var loadPromptDialog     = document.getElementById('loadPromptDialog');
+  var loadPromptEntryTitle = document.getElementById('loadPromptEntryTitle');
+  var loadKeepBtn          = document.getElementById('loadKeepBtn');
+  var loadFreshBtn         = document.getElementById('loadFreshBtn');
+
+  var bankBody         = document.getElementById('bankBody');
+  var bankEmpty        = document.getElementById('bankEmpty');
+  var bankCount        = document.getElementById('bankCount');
+  var bankSearch       = document.getElementById('bankSearch');
+  var bankModuleFilter = document.getElementById('bankModuleFilter');
+  var bankDokFilter    = document.getElementById('bankDokFilter');
+  var randomizeBtn     = document.getElementById('randomizeBtn');
+  var exportBtn        = document.getElementById('exportBankBtn');
+  var importBtn        = document.getElementById('importBankBtn');
+  var importInput      = document.getElementById('importBankFile');
+  var jumpBankBtn      = document.getElementById('jumpBank');
+
+  var loadedContext = document.getElementById('loadedContext');
+  var lcModule      = document.getElementById('lcModule');
+  var lcTitle       = document.getElementById('lcTitle');
+  var lcDok         = document.getElementById('lcDok');
+  var lcNotes       = document.getElementById('lcNotes');
+  var lcSource      = document.getElementById('lcSource');
+  var lcClose       = document.getElementById('lcClose');
+
+  // ---- IndexedDB ----
+  var dbPromise = (function () {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(DB_NAME, DB_VER);
+      req.onupgradeneeded = function (e) {
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+          var os = db.createObjectStore(STORE, { keyPath: 'id' });
+          os.createIndex('module', 'module', { unique: false });
+          os.createIndex('createdAt', 'createdAt', { unique: false });
+        }
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror   = function () { reject(req.error); };
+    });
+  })();
+
+  function tx(mode) {
+    return dbPromise.then(function (db) {
+      return db.transaction(STORE, mode).objectStore(STORE);
+    });
+  }
+  function dbGetAll() {
+    return tx('readonly').then(function (store) {
+      return new Promise(function (resolve, reject) {
+        var req = store.getAll();
+        req.onsuccess = function () { resolve(req.result || []); };
+        req.onerror   = function () { reject(req.error); };
+      });
+    });
+  }
+  function dbPut(entry) {
+    return tx('readwrite').then(function (store) {
+      return new Promise(function (resolve, reject) {
+        var req = store.put(entry);
+        req.onsuccess = function () { resolve(entry); };
+        req.onerror   = function () { reject(req.error); };
+      });
+    });
+  }
+  function dbDelete(id) {
+    return tx('readwrite').then(function (store) {
+      return new Promise(function (resolve, reject) {
+        var req = store.delete(id);
+        req.onsuccess = function () { resolve(); };
+        req.onerror   = function () { reject(req.error); };
+      });
+    });
+  }
+  function dbGet(id) {
+    return tx('readonly').then(function (store) {
+      return new Promise(function (resolve, reject) {
+        var req = store.get(id);
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror   = function () { reject(req.error); };
+      });
+    });
+  }
+
+  // ---- Util ----
+  function uid() {
+    return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9);
+  }
+  function escapeHTML(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+  function safeOpen(dlg) {
+    if (typeof dlg.showModal === 'function') {
+      try { dlg.showModal(); return; } catch (e) {}
+    }
+    dlg.setAttribute('open', '');
+  }
+  function safeClose(dlg) {
+    if (typeof dlg.close === 'function') { try { dlg.close(); } catch (e) {} }
+    dlg.removeAttribute('open');
+  }
+  document.querySelectorAll('dialog.atlas-dialog [data-dlg-close]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var dlg = btn.closest('dialog');
+      if (dlg) safeClose(dlg);
+    });
+  });
+
+  // ---- Save dialog ----
+  var editingId = null;
+
+  function openSaveDialog(prefill) {
+    var pair = window.atlasAPI.getCurrentPair();
+    if (!pair.practiceURL || !pair.keyURL) {
+      alert('Load both a practice image and an answer key before saving this page.');
+      return;
+    }
+    saveThumbP.src = pair.practiceURL;
+    saveThumbK.src = pair.keyURL;
+
+    if (prefill) {
+      editingId = prefill.id;
+      saveDialogTitle.textContent = 'Edit this page';
+      saveSubmit.textContent = 'Save changes';
+      saveTitle.value  = prefill.title  || '';
+      saveModule.value = prefill.module || '';
+      saveNotes.value  = prefill.notes  || '';
+      saveDok.value    = prefill.dok ? String(prefill.dok) : '';
+      saveSource.value = prefill.source || '';
+    } else {
+      editingId = null;
+      saveDialogTitle.textContent = 'Save this page';
+      saveSubmit.textContent = 'Save page';
+      saveForm.reset();
+    }
+    safeOpen(saveDialog);
+    setTimeout(function () { saveTitle.focus(); }, 30);
+  }
+
+  saveBankBtn.addEventListener('click', function () { openSaveDialog(null); });
+
+  saveForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title = (saveTitle.value || '').trim();
+    if (!title) { saveTitle.focus(); return; }
+    var pair = window.atlasAPI.getCurrentPair();
+
+    if (editingId) {
+      dbGet(editingId).then(function (existing) {
+        if (!existing) { editingId = null; return; }
+        existing.title  = title;
+        existing.module = (saveModule.value || 'Unsorted').trim() || 'Unsorted';
+        existing.notes  = (saveNotes.value  || '').trim();
+        existing.dok    = saveDok.value ? parseInt(saveDok.value, 10) : null;
+        existing.source = (saveSource.value || '').trim();
+        existing.updatedAt = Date.now();
+        // Replace images only if the user has different ones currently loaded:
+        if (pair.practiceURL && pair.practiceURL !== existing.practiceURL) existing.practiceURL = pair.practiceURL;
+        if (pair.keyURL && pair.keyURL !== existing.keyURL) existing.keyURL = pair.keyURL;
+        return dbPut(existing).then(function () {
+          editingId = null;
+          safeClose(saveDialog);
+          renderBank();
+        });
+      });
+    } else {
+      var now = Date.now();
+      var entry = {
+        id: uid(),
+        title: title,
+        module: (saveModule.value || 'Unsorted').trim() || 'Unsorted',
+        notes:  (saveNotes.value  || '').trim(),
+        dok:    saveDok.value ? parseInt(saveDok.value, 10) : null,
+        source: (saveSource.value || '').trim(),
+        practiceURL: pair.practiceURL,
+        keyURL: pair.keyURL,
+        createdAt: now,
+        updatedAt: now
+      };
+      dbPut(entry).then(function () {
+        safeClose(saveDialog);
+        renderBank();
+      });
+    }
+  });
+
+  // ---- Loaded-context strip ----
+  function showLoadedContext(entry) {
+    lcModule.textContent = entry.module || 'Unsorted';
+    lcTitle.textContent  = entry.title  || 'Untitled';
+    if (entry.dok) {
+      lcDok.textContent = 'DOK ' + entry.dok;
+      lcDok.className = 'dok-chip dok-' + entry.dok;
+      lcDok.hidden = false;
+    } else {
+      lcDok.hidden = true;
+    }
+    if (entry.notes) { lcNotes.textContent = entry.notes; lcNotes.hidden = false; }
+    else { lcNotes.hidden = true; }
+    if (entry.source) { lcSource.textContent = 'Source: ' + entry.source; lcSource.hidden = false; }
+    else { lcSource.hidden = true; }
+    loadedContext.hidden = false;
+  }
+  function dismissLoadedContext() { loadedContext.hidden = true; }
+  lcClose.addEventListener('click', dismissLoadedContext);
+
+  // Expose dismissal for the main module's resetAll handler
+  window.atlasBank = { dismissLoadedContext: dismissLoadedContext };
+
+  // ---- Load flow with keep / fresh prompt ----
+  var pendingLoadEntry = null;
+  function requestLoadEntry(entry) {
+    pendingLoadEntry = entry;
+    if (window.atlasAPI.hasLabels()) {
+      loadPromptEntryTitle.textContent = entry.title || 'this entry';
+      safeOpen(loadPromptDialog);
+    } else {
+      doLoad(entry, false);
+    }
+  }
+  loadKeepBtn.addEventListener('click', function () {
+    if (pendingLoadEntry) doLoad(pendingLoadEntry, true);
+    safeClose(loadPromptDialog);
+    pendingLoadEntry = null;
+  });
+  loadFreshBtn.addEventListener('click', function () {
+    if (pendingLoadEntry) doLoad(pendingLoadEntry, false);
+    safeClose(loadPromptDialog);
+    pendingLoadEntry = null;
+  });
+  function doLoad(entry, keepLabels) {
+    if (!keepLabels) window.atlasAPI.clearLabels();
+    window.atlasAPI.setPair(entry.practiceURL, entry.keyURL, {
+      titlePractice: entry.title + ' (practice)',
+      titleKey:      entry.title + ' (key)'
+    });
+    showLoadedContext(entry);
+    // Scroll to canvas
+    var canvasBlock = document.querySelector('.canvas-block');
+    if (canvasBlock && canvasBlock.scrollIntoView) {
+      canvasBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // ---- Delete ----
+  function deleteEntry(entry) {
+    if (!confirm('Remove "' + entry.title + '" from your coloring book? This cannot be undone.')) return;
+    dbDelete(entry.id).then(renderBank);
+  }
+
+  // ---- Render index ----
+  function getFilters() {
+    return {
+      q: (bankSearch.value || '').trim().toLowerCase(),
+      module: bankModuleFilter.value || '',
+      dok: bankDokFilter.value || ''
+    };
+  }
+  function applyFilters(entries, f) {
+    return entries.filter(function (e) {
+      if (f.module && (e.module || 'Unsorted') !== f.module) return false;
+      if (f.dok && String(e.dok || '') !== f.dok) return false;
+      if (f.q) {
+        var hay = ((e.title || '') + ' ' + (e.notes || '') + ' ' + (e.source || '')).toLowerCase();
+        if (hay.indexOf(f.q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderBank() {
+    return dbGetAll().then(function (entries) {
+      // Update count
+      bankCount.textContent = '(' + entries.length + ')';
+
+      // Build module filter options (preserve current selection)
+      var modules = {};
+      entries.forEach(function (e) { var m = e.module || 'Unsorted'; modules[m] = (modules[m] || 0) + 1; });
+      var moduleNames = Object.keys(modules).sort(function (a, b) { return a.localeCompare(b); });
+      var currentFilter = bankModuleFilter.value;
+      bankModuleFilter.innerHTML = '<option value="">All modules</option>' +
+        moduleNames.map(function (m) {
+          return '<option value="' + escapeHTML(m) + '"' + (m === currentFilter ? ' selected' : '') + '>' + escapeHTML(m) + ' (' + modules[m] + ')</option>';
+        }).join('');
+
+      // Apply filters
+      var f = getFilters();
+      var filtered = applyFilters(entries, f);
+
+      // Enable / disable randomize
+      randomizeBtn.disabled = (filtered.length === 0);
+
+      // Render
+      if (entries.length === 0) {
+        bankEmpty.style.display = '';
+        bankEmpty.innerHTML =
+          '<p class="bank-empty-title">No pages yet</p>' +
+          '<p class="bank-empty-sub">Load a practice image plus an answer key, then click <strong>Save this page</strong> in the toolbar to start your book. Pages you save here are stored on this device and grouped by module in this index.</p>';
+        // Clear any rendered modules
+        Array.prototype.forEach.call(bankBody.querySelectorAll('.bank-module'), function (n) { n.remove(); });
+        return;
+      } else if (filtered.length === 0) {
+        bankEmpty.style.display = '';
+        bankEmpty.innerHTML =
+          '<p class="bank-empty-title">No pages match your filters</p>' +
+          '<p class="bank-empty-sub">Try a different module, DOK level, or clear the search box.</p>';
+        Array.prototype.forEach.call(bankBody.querySelectorAll('.bank-module'), function (n) { n.remove(); });
+        return;
+      } else {
+        bankEmpty.style.display = 'none';
+      }
+
+      // Group filtered entries by module
+      var groups = {};
+      filtered.forEach(function (e) {
+        var m = e.module || 'Unsorted';
+        (groups[m] = groups[m] || []).push(e);
+      });
+      Object.keys(groups).forEach(function (m) {
+        groups[m].sort(function (a, b) {
+          var ta = (a.title || '').toLowerCase(), tb = (b.title || '').toLowerCase();
+          if (ta < tb) return -1; if (ta > tb) return 1; return 0;
+        });
+      });
+      var moduleOrder = Object.keys(groups).sort(function (a, b) { return a.localeCompare(b); });
+
+      // Replace existing module DOM
+      Array.prototype.forEach.call(bankBody.querySelectorAll('.bank-module'), function (n) { n.remove(); });
+
+      moduleOrder.forEach(function (m) {
+        var moduleEl = document.createElement('section');
+        moduleEl.className = 'bank-module';
+        moduleEl.setAttribute('data-collapsed', 'false');
+
+        var header = document.createElement('button');
+        header.type = 'button';
+        header.className = 'bank-module-header';
+        header.setAttribute('aria-expanded', 'true');
+        header.innerHTML =
+          '<span class="bank-module-caret" aria-hidden="true"></span>' +
+          '<span class="bank-module-name">' + escapeHTML(m) + '</span>' +
+          '<span class="bank-module-count">' + groups[m].length + ' page' + (groups[m].length === 1 ? '' : 's') + '</span>';
+        header.addEventListener('click', function () {
+          var collapsed = moduleEl.getAttribute('data-collapsed') === 'true';
+          moduleEl.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+          header.setAttribute('aria-expanded', collapsed ? 'true' : 'false');
+        });
+        moduleEl.appendChild(header);
+
+        var entriesEl = document.createElement('div');
+        entriesEl.className = 'bank-entries';
+
+        groups[m].forEach(function (entry) {
+          var card = document.createElement('article');
+          card.className = 'bank-entry';
+          card.setAttribute('aria-label', entry.title);
+
+          var thumbs = document.createElement('div');
+          thumbs.className = 'bank-entry-thumbs';
+          thumbs.innerHTML =
+            '<div class="bank-entry-thumb"><span class="bank-entry-thumb-label">Practice</span><img alt="" src="' + escapeHTML(entry.practiceURL) + '"></div>' +
+            '<div class="bank-entry-thumb"><span class="bank-entry-thumb-label">Key</span><img alt="" src="' + escapeHTML(entry.keyURL) + '"></div>';
+          card.appendChild(thumbs);
+
+          var meta = document.createElement('div');
+          meta.className = 'bank-entry-meta';
+          var titleRow = '<div class="bank-entry-title-row"><span class="bank-entry-title">' + escapeHTML(entry.title) + '</span>';
+          if (entry.dok) titleRow += '<span class="dok-chip dok-' + entry.dok + '">DOK ' + entry.dok + '</span>';
+          titleRow += '</div>';
+          var notesHtml  = entry.notes  ? '<p class="bank-entry-notes">'  + escapeHTML(entry.notes)  + '</p>' : '';
+          var sourceHtml = entry.source ? '<p class="bank-entry-source">' + escapeHTML(entry.source) + '</p>' : '';
+          meta.innerHTML = titleRow + notesHtml + sourceHtml;
+          card.appendChild(meta);
+
+          var actions = document.createElement('div');
+          actions.className = 'bank-entry-actions';
+
+          var loadBtn = document.createElement('button');
+          loadBtn.type = 'button'; loadBtn.className = 'primary'; loadBtn.textContent = 'Load';
+          loadBtn.addEventListener('click', function () { requestLoadEntry(entry); });
+
+          var editBtn = document.createElement('button');
+          editBtn.type = 'button'; editBtn.textContent = 'Edit';
+          editBtn.addEventListener('click', function () { openSaveDialog(entry); });
+
+          var delBtn = document.createElement('button');
+          delBtn.type = 'button'; delBtn.className = 'danger'; delBtn.textContent = 'Delete';
+          delBtn.addEventListener('click', function () { deleteEntry(entry); });
+
+          actions.appendChild(loadBtn);
+          actions.appendChild(editBtn);
+          actions.appendChild(delBtn);
+          card.appendChild(actions);
+
+          entriesEl.appendChild(card);
+        });
+
+        moduleEl.appendChild(entriesEl);
+        bankBody.appendChild(moduleEl);
+      });
+    });
+  }
+
+  bankSearch.addEventListener('input', function () { renderBank(); });
+  bankModuleFilter.addEventListener('change', function () { renderBank(); });
+  bankDokFilter.addEventListener('change', function () { renderBank(); });
+
+  // ---- Randomize ----
+  randomizeBtn.addEventListener('click', function () { randomLoad(); });
+
+  function randomLoad() {
+    dbGetAll().then(function (entries) {
+      var f = getFilters();
+      var pool = applyFilters(entries, f);
+      // Avoid replaying the currently loaded item if we have 2+ options
+      if (pool.length > 1 && window.atlasBank.currentLoadedId) {
+        pool = pool.filter(function (e) { return e.id !== window.atlasBank.currentLoadedId; });
+      }
+      if (pool.length === 0) {
+        alert('No pages available to shuffle. Adjust your filters or save more pages to your coloring book.');
+        return;
+      }
+      var pick = pool[Math.floor(Math.random() * pool.length)];
+      window.atlasBank.currentLoadedId = pick.id;
+      requestLoadEntry(pick);
+    });
+  }
+
+  // Track currently-loaded entry ID for randomize-no-repeat
+  var _origShow = showLoadedContext;
+  showLoadedContext = function (entry) { window.atlasBank.currentLoadedId = entry.id; _origShow(entry); };
+
+  // ---- Export ----
+  exportBtn.addEventListener('click', function () {
+    dbGetAll().then(function (entries) {
+      if (entries.length === 0) {
+        alert('Your coloring book is empty. Save at least one page before exporting.');
+        return;
+      }
+      var payload = {
+        format: 'atlas-coloring-book',
+        legacyFormat: 'atlas-labeling-bank',
+        version: EXPORT_VERSION,
+        exportedAt: new Date().toISOString(),
+        course: 'BIO 004',
+        entries: entries
+      };
+      var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var d = new Date();
+      var stamp = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'atlas-coloring-book-' + stamp + '.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 500);
+    });
+  });
+
+  // ---- Import ----
+  importBtn.addEventListener('click', function () { importInput.click(); });
+  importInput.addEventListener('change', function (e) {
+    var file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      var data;
+      try { data = JSON.parse(ev.target.result); }
+      catch (err) { alert('That file is not valid JSON.'); return; }
+      if (!data || (data.format !== 'atlas-coloring-book' && data.format !== 'atlas-labeling-bank') || !Array.isArray(data.entries)) {
+        alert('That file is not a recognised Atlas Coloring Book export.');
+        return;
+      }
+      dbGetAll().then(function (existing) {
+        var existingIds = {};
+        existing.forEach(function (e) { existingIds[e.id] = true; });
+        var incoming = data.entries.filter(function (e) { return e && e.practiceURL && e.keyURL && e.title; });
+        var collisions = incoming.filter(function (e) { return existingIds[e.id]; }).length;
+        var msg = 'Import ' + incoming.length + ' page' + (incoming.length === 1 ? '' : 's') + ' into your coloring book?';
+        if (collisions > 0) msg += '\n\n' + collisions + ' will overwrite existing pages with the same ID.';
+        if (!confirm(msg)) return;
+        Promise.all(incoming.map(function (entry) {
+          var now = Date.now();
+          var rec = {
+            id: entry.id || uid(),
+            title: String(entry.title || 'Untitled').slice(0, 200),
+            module: String(entry.module || 'Unsorted').slice(0, 120),
+            notes: String(entry.notes || '').slice(0, 1000),
+            dok: entry.dok ? parseInt(entry.dok, 10) : null,
+            source: String(entry.source || '').slice(0, 400),
+            practiceURL: entry.practiceURL,
+            keyURL: entry.keyURL,
+            createdAt: entry.createdAt || now,
+            updatedAt: now
+          };
+          return dbPut(rec);
+        })).then(function () {
+          renderBank();
+          alert('Imported ' + incoming.length + ' page' + (incoming.length === 1 ? '' : 's') + '.');
+        });
+      });
+    };
+    reader.readAsText(file);
+  });
+
+  // ---- Jump-to-bank button in the hero ----
+  if (jumpBankBtn) {
+    jumpBankBtn.addEventListener('click', function () {
+      var bank = document.getElementById('bank');
+      if (bank && bank.scrollIntoView) bank.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  // ---- Keyboard shortcuts: B = save page, R = shuffle ----
+  document.addEventListener('keydown', function (e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (saveDialog.hasAttribute('open') || loadPromptDialog.hasAttribute('open')) return;
+    var k = e.key.toLowerCase();
+    if (k === 'b') {
+      if (!saveBankBtn.disabled) { openSaveDialog(null); e.preventDefault(); }
+    } else if (k === 'r') {
+      if (!randomizeBtn.disabled) { randomLoad(); e.preventDefault(); }
+    }
+  });
+
+  // ---- Initial render ----
+  renderBank();
+})();
+
+// Iframe height sender (Kajabi / GitHub Pages embed compatibility)
+(function () {
+  var FRAME_ID = 'bio004-atlas-coloring-book';
+  function sendHeight() {
+    var h = Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0);
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'resize', id: FRAME_ID, height: h }, '*');
+    }
+  }
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if (window.ResizeObserver) new ResizeObserver(sendHeight).observe(document.body);
+  [200, 600, 1200, 2400].forEach(function (t) { setTimeout(sendHeight, t); });
+})();
+</script>
+</body>
+</html>

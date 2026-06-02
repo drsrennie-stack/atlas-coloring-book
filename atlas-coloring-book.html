@@ -862,28 +862,31 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   function mid(a, b)  { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
 
   wrap.addEventListener('touchstart', function (e) {
-    if (e.touches.length >= 2) {
-      e.preventDefault();
-      // Cancel any in-progress stroke when the gesture begins
-      if (state.currentStroke) state.currentStroke = null;
-      state.gestureActive = true;
-      var t = getTouchList(e);
-      var wr = wrap.getBoundingClientRect();
-      pinchStart = {
-        touches: [t[0], t[1]],
-        startDist: dist(t[0], t[1]),
-        startMid: mid(t[0], t[1]),
-        startZoom: state.zoom,
-        startPanX: state.panX,
-        startPanY: state.panY,
-        wrapLeft: wr.left,
-        wrapTop:  wr.top
-      };
-      // No animation during pinch
-      wrap.querySelectorAll('.pane-zoom-content').forEach(function (el) {
-        el.classList.remove('is-animating');
-      });
+    if (e.touches.length < 2) return;
+    // If any touch is a stylus (Apple Pencil), this is drawing-with-palm-rest, not a
+    // two-finger gesture. Don't hijack it.
+    for (var si = 0; si < e.touches.length; si++) {
+      if (e.touches[si].touchType === 'stylus') return;
     }
+    e.preventDefault();
+    // Cancel any in-progress finger stroke when a real two-finger gesture begins
+    if (state.currentStroke) state.currentStroke = null;
+    state.gestureActive = true;
+    var t = getTouchList(e);
+    var wr = wrap.getBoundingClientRect();
+    pinchStart = {
+      touches: [t[0], t[1]],
+      startDist: dist(t[0], t[1]),
+      startMid: mid(t[0], t[1]),
+      startZoom: state.zoom,
+      startPanX: state.panX,
+      startPanY: state.panY,
+      wrapLeft: wr.left,
+      wrapTop:  wr.top
+    };
+    wrap.querySelectorAll('.pane-zoom-content').forEach(function (el) {
+      el.classList.remove('is-animating');
+    });
   }, { passive: false });
 
   wrap.addEventListener('touchmove', function (e) {
@@ -1158,13 +1161,13 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   }
   // Returns true when this pointer event should be allowed to draw.
   function isDrawingPointer(ev) {
-    // Active pinch / pan gesture: don't draw, even from pen (pen + finger could mean
-    // the user is steadying with pen while pinching with two fingers).
+    // Apple Pencil / pen / mouse: ALWAYS draw, regardless of gesture state.
+    // Trust the explicit input device. (Palm + pencil = drawing, not pinching.)
+    if (ev.pointerType === 'pen' || ev.pointerType === 'mouse') return true;
+    // Touch (finger): blocked during a two-finger gesture or in stylus-only mode.
     if (state.gestureActive) return false;
-    if (!state.stylusOnly) return true;
-    // In stylus-only mode, only pen-type pointers draw. Mouse still draws on desktop,
-    // touch/finger does not. Apple Pencil reports pointerType === 'pen'.
-    return ev.pointerType === 'pen' || ev.pointerType === 'mouse';
+    if (state.stylusOnly) return false;
+    return true;
   }
 
   canvas.addEventListener('pointerdown', function (ev) {

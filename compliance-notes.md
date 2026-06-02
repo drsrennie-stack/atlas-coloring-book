@@ -1,7 +1,7 @@
 # Accessibility Compliance Notes
 
 **Project:** Drawing Atlas, Atlas Coloring Book
-**Files covered:** atlas-coloring-book.html
+**Files covered:** atlas-coloring-book.html, canvas-page-atlas-coloring-book.html, course-card-bio004.html
 **Date:** 2026-06-01
 **Course:** BIO 004 (Human Anatomy, Solano Community College)
 
@@ -142,6 +142,48 @@ The bank stores images and metadata in IndexedDB on this device only. No data is
 3. **Drawing canvas remains pointer-only.** Unchanged from the prior version.
 4. **High-contrast mode override.** Still pending, applies to dialogs as well.
 
+## Canvas launcher page and course card (2026-06-01 addition)
+
+Two student-facing artifacts added to support the BIO 004 Solano launch.
+
+### canvas-page-atlas-coloring-book.html
+
+A self-contained HTML page intended to be pasted into a Canvas LMS page (instructions are baked into the file as a comment block). Content surface:
+
+- Three-figure logo plus "BIO 004 · Solano Community College" identity line
+- Headline "Atlas Coloring Book" with rust "Book" accent
+- Subhead explaining the workflow and where the bank lives
+- Primary CTA: external link to `https://www.medmasterscollaborative.com/atlas-coloring-book` with `target="_blank" rel="noopener"` per the global HTML rule
+- Five-step quick-start using a numbered list with semantic `<ol>`
+- Keyboard shortcuts grid mirroring the tool
+- Study tips block reinforcing "given, not Googled" pedagogy
+- Footer with byline and term
+
+Accessibility floor: heading hierarchy h1 → h2, `aria-labelledby` linking sections to their titles, semantic `<ol>` and `<ul>`, focus-visible outlines (rust, 3px), prefers-reduced-motion override on the launch button transform, all interactive controls keyboard-reachable. The external link has a descriptive `aria-label` ("Open Atlas Coloring Book in a new tab") so screen readers announce both the destination and the new-tab behavior.
+
+Contrast highlights for the launcher:
+
+| Foreground | Background | Ratio | Pass |
+|---|---|---|---|
+| White `#FFFFFF` | Navy `#0B1530` | 17.4:1 | AAA |
+| Navy `#0B1530` | Off-white `#FAFAF9` | 17.4:1 | AAA |
+| Rust `#8B3A2E` | Off-white `#FAFAF9` | 6.6:1 | AA, AAA large |
+| Navy `#0B1530` | Light gold `#C9A14A` border | n/a (decorative) | n/a |
+
+### course-card-bio004.html
+
+A preview file rendering the same card markup at four sizes via CSS custom property overrides: 1200×675 (high-res Canvas course image), 400×225 (Canvas dashboard live size), 262×146 (smallest Canvas thumbnail), 800×800 (square Kajabi tile). The card itself uses semantic `<article>` with `aria-label`, heading hierarchy h1 (course code) → h2 (course name), and the three-figure logo as decorative SVG with `aria-hidden="true"`. The card is intended as a screenshot source (not a live HTML embed inside Canvas), so the file ships with explicit export instructions for macOS / Windows screenshot tools and DevTools "Capture node screenshot."
+
+Contrast on the card:
+
+| Foreground | Background | Ratio | Pass |
+|---|---|---|---|
+| Navy `#0B1530` | Off-white `#FAFAF9` | 17.4:1 | AAA |
+| Rust `#8B3A2E` | Off-white `#FAFAF9` | 6.6:1 | AA |
+| Brushed gold `#C9A14A` accent bar | Off-white `#FAFAF9` | 2.4:1 (decorative, non-text) | meets 1.4.11 |
+
+Type sizes at the mini (262×146) variant: course code 36px, course name 14px, eyebrow 5px. The eyebrow at that size is decorative-only; the course code and name carry the wayfinding load. AA text contrast is preserved at every size.
+
 ## Reviewer
 
-Built and self-reviewed by Dr. Sharilyn Rennie with Claude assistance. Pending student-user check on a Wacom tablet and on iPad with Apple Pencil.
+Built and self-reviewed by Dr. Sharilyn Rennie with Claude assistance. Pending student-user check on a Wacom tablet and on iPad with Apple Pencil. Course card pending visual check by Solano marketing / dean review if required.

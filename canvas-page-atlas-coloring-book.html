@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas Coloring Book &middot; BIO 004 Canvas Page</title>
+<!--
+  CANVAS PASTE INSTRUCTIONS:
+  This file is a standalone preview. To put it on a Canvas page:
+    1. Open the Canvas page in Edit mode.
+    2. Click the </> HTML editor button (bottom right of the rich text editor).
+    3. Copy everything inside the <!-- BEGIN CANVAS BODY --><!-- END CANVAS BODY --> markers below.
+    4. Paste into the Canvas HTML editor and save.
+  The full <!DOCTYPE>, <head>, and <body> wrappers are only here so the file
+  previews cleanly outside Canvas.
+-->
+<style>
+@import url('https://cdn.jsdelivr.net/npm/@fontsource-variable/plus-jakarta-sans/index.css');
+body { margin: 0; background: #FAFAF9; }
+</style>
+</head>
+<body>
+
+<!-- BEGIN CANVAS BODY ============================================ -->
+<style>
+.acb-page * { box-sizing: border-box; }
+.acb-page { font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #0B1530; line-height: 1.55; max-width: 980px; margin: 0 auto; padding: 24px 28px 32px; background: #FAFAF9; border-radius: 12px; }
+.acb-page a:focus-visible, .acb-page button:focus-visible { outline: 3px solid #8B3A2E; outline-offset: 3px; border-radius: 4px; }
+
+.acb-hero { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 12px; padding: 28px 30px 30px; box-shadow: 0 1px 3px rgba(11, 21, 48, 0.06); }
+.acb-hero .acb-logo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.acb-hero .acb-logo-row svg { height: 44px; width: auto; flex-shrink: 0; }
+.acb-hero .acb-logo-title { display: flex; flex-direction: column; gap: 2px; }
+.acb-hero .acb-logo-name { font-size: 19px; font-weight: 800; color: #0B1530; line-height: 1; }
+.acb-hero .acb-logo-name .acb-accent { color: #8B3A2E; }
+.acb-hero .acb-logo-sub { font-size: 10px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; color: #0B1530; opacity: 0.7; }
+.acb-eyebrow { font-size: 10.5px; font-weight: 700; color: #8B3A2E; letter-spacing: 0.28em; text-transform: uppercase; margin: 0 0 10px; }
+.acb-headline { font-size: clamp(28px, 4vw, 40px); font-weight: 800; color: #0B1530; line-height: 1.05; margin: 0 0 12px; }
+.acb-headline .acb-accent { color: #8B3A2E; }
+.acb-subhead { font-size: 15px; color: #0B1530; line-height: 1.6; opacity: 0.86; margin: 0 0 22px; max-width: 720px; }
+
+.acb-cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 18px 20px; background: #FAFAF9; border-radius: 8px; border-left: 4px solid #C9A14A; }
+.acb-launch { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; background: #0B1530; color: #FFFFFF; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; transition: background 200ms ease, transform 200ms ease; box-shadow: 0 2px 6px rgba(11, 21, 48, 0.18); }
+.acb-launch:hover, .acb-launch:focus-visible { background: #142A36; color: #FFFFFF; text-decoration: none; transform: translateY(-1px); }
+.acb-launch svg { width: 14px; height: 14px; }
+.acb-cta-note { font-size: 12.5px; color: #0B1530; opacity: 0.78; flex: 1 1 220px; min-width: 0; line-height: 1.5; }
+.acb-cta-note strong { font-weight: 800; color: #8B3A2E; }
+
+.acb-section { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 12px; padding: 22px 26px; margin-top: 18px; box-shadow: 0 1px 3px rgba(11, 21, 48, 0.06); }
+.acb-section-eyebrow { font-size: 10.5px; font-weight: 700; color: #8B3A2E; letter-spacing: 0.20em; text-transform: uppercase; margin: 0 0 4px; }
+.acb-section-title { font-size: 19px; font-weight: 800; color: #0B1530; margin: 0 0 12px; line-height: 1.25; }
+
+.acb-steps { list-style: none; padding: 0; margin: 0; counter-reset: step; display: grid; gap: 12px; }
+.acb-steps li { display: grid; grid-template-columns: 36px 1fr; gap: 14px; align-items: start; padding: 12px 14px; background: #FAFAF9; border-radius: 6px; border-left: 3px solid #8B3A2E; }
+.acb-steps li::before { counter-increment: step; content: counter(step); display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #0B1530; color: #FAFAF9; border-radius: 50%; font-size: 14px; font-weight: 800; line-height: 1; }
+.acb-steps li strong { color: #0B1530; font-weight: 800; }
+.acb-steps li span { font-size: 14px; color: #0B1530; line-height: 1.55; }
+
+.acb-kb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 24px; margin-top: 8px; }
+.acb-kb-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #0B1530; }
+.acb-kb-key { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 24px; padding: 0 7px; border-radius: 4px; background: #FAFAF9; border: 1px solid rgba(11, 21, 48, 0.20); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; font-weight: 700; color: #0B1530; }
+
+.acb-tips { padding: 0; margin: 0; list-style: none; display: grid; gap: 10px; }
+.acb-tips li { padding: 10px 14px 10px 18px; background: #FAFAF9; border-left: 3px solid #C9A14A; border-radius: 4px; font-size: 13.5px; line-height: 1.55; }
+.acb-tips li strong { color: #8B3A2E; font-weight: 800; }
+
+.acb-footer { margin-top: 22px; padding: 16px 8px 4px; text-align: center; }
+.acb-footer-byline { font-size: 10.5px; font-weight: 700; color: #8B3A2E; letter-spacing: 0.18em; text-transform: uppercase; margin: 0; }
+.acb-footer-meta { font-size: 11.5px; color: #0B1530; opacity: 0.62; margin: 6px 0 0; }
+
+@media (max-width: 560px) {
+  .acb-page { padding: 18px 14px 24px; }
+  .acb-hero { padding: 22px 20px; }
+  .acb-section { padding: 18px 18px; }
+  .acb-launch { width: 100%; justify-content: center; }
+  .acb-steps li { grid-template-columns: 28px 1fr; gap: 10px; padding: 10px 12px; }
+  .acb-steps li::before { width: 26px; height: 26px; font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acb-launch { transition: none; }
+  .acb-launch:hover { transform: none; }
+}
+</style>
+
+<section class="acb-page" aria-labelledby="acb-headline">
+
+  <header class="acb-hero">
+    <div class="acb-logo-row" aria-hidden="true">
+      <svg viewBox="40 10 125 148" focusable="false" aria-hidden="true">
+        <g transform="translate(0, 18)">
+          <g transform="translate(60, 0) rotate(8 0 130)"><circle cx="0" cy="20" r="10" fill="#0B1530"/><path d="M 0,32 C -10,32 -16,36 -16,42 C -16,55 -13,68 -11,82 C -10,100 -12,118 -14,130 L 14,130 C 12,118 10,100 11,82 C 13,68 16,55 16,42 C 16,36 10,32 0,32 Z" fill="#0B1530"/></g>
+          <g transform="translate(100, 0)"><circle cx="0" cy="10" r="11" fill="#8B3A2E"/><path d="M 0,22 C -11,22 -17,26 -17,34 C -17,52 -14,70 -12,86 C -11,108 -13,122 -15,132 L 15,132 C 13,122 11,108 12,86 C 14,70 17,52 17,34 C 17,26 11,22 0,22 Z" fill="#8B3A2E"/></g>
+          <g transform="translate(140, 0) rotate(-8 0 130)"><circle cx="0" cy="20" r="10" fill="#C9A14A"/><path d="M 0,32 C -10,32 -16,36 -16,42 C -16,55 -13,68 -11,82 C -10,100 -12,118 -14,130 L 14,130 C 12,118 10,100 11,82 C 13,68 16,55 16,42 C 16,36 10,32 0,32 Z" fill="#C9A14A"/></g>
+        </g>
+      </svg>
+      <div class="acb-logo-title">
+        <span class="acb-logo-name">Human <span class="acb-accent">Anatomy</span></span>
+        <span class="acb-logo-sub">BIO 004 &middot; Solano Community College</span>
+      </div>
+    </div>
+
+    <p class="acb-eyebrow">Atlas Tools &middot; Required for lab prep</p>
+    <h1 id="acb-headline" class="acb-headline">Atlas Coloring <span class="acb-accent">Book</span>.</h1>
+    <p class="acb-subhead">Open the tool, drop in an atlas image, color your labels by hand, then flip to the answer key to compare. Each pair you save becomes a page in your own coloring book, grouped by module, so by exam week you have your full study library in one place. The book is yours, on your device.</p>
+
+    <div class="acb-cta-row">
+      <a class="acb-launch" href="https://www.medmasterscollaborative.com/atlas-coloring-book" target="_blank" rel="noopener" aria-label="Open Atlas Coloring Book in a new tab">
+        Open the Coloring Book
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>
+      </a>
+      <p class="acb-cta-note">Opens in a new tab. <strong>No login</strong> needed. Your saved pages stay on your device, so use <strong>Export book</strong> regularly to back them up.</p>
+    </div>
+  </header>
+
+  <section class="acb-section" aria-labelledby="acb-howto-title">
+    <p class="acb-section-eyebrow">Quick start</p>
+    <h2 id="acb-howto-title" class="acb-section-title">How to use it</h2>
+    <ol class="acb-steps">
+      <li><span><strong>Load two images.</strong> Drop the unlabeled atlas image into the Practice slot and a labeled version into the Answer Key slot. Both can be from textbook scans, lecture slides, or images you take yourself.</span></li>
+      <li><span><strong>Color in your labels.</strong> Pick a pen color, choose a size, and label everything you can identify on the practice image. Use white pen for dark backgrounds and navy or crimson for light.</span></li>
+      <li><span><strong>Flip the key.</strong> Click <strong>Show key</strong> (or press <strong>K</strong>) to swap the background to the labeled answer key. Your labels stay drawn on top, so you can compare side by side.</span></li>
+      <li><span><strong>Save this page to your book.</strong> Click <strong>Save this page</strong>, name it, pick a module (Skeletal, Muscular, etc.), and add notes if you want. The page lives in your coloring book index below the canvas.</span></li>
+      <li><span><strong>Practice with random shuffle.</strong> When you are ready to drill, scroll to your book and press <strong>Shuffle a page</strong> to load a random page from any module or DOK level you filter by.</span></li>
+    </ol>
+  </section>
+
+  <section class="acb-section" aria-labelledby="acb-kb-title">
+    <p class="acb-section-eyebrow">Speed</p>
+    <h2 id="acb-kb-title" class="acb-section-title">Keyboard shortcuts</h2>
+    <div class="acb-kb-grid">
+      <div class="acb-kb-row"><span class="acb-kb-key">K</span><span>Toggle answer key</span></div>
+      <div class="acb-kb-row"><span class="acb-kb-key">E</span><span>Eraser on / off</span></div>
+      <div class="acb-kb-row"><span class="acb-kb-key">U</span><span>Undo last stroke</span></div>
+      <div class="acb-kb-row"><span class="acb-kb-key">D</span><span>Dark / light background</span></div>
+      <div class="acb-kb-row"><span class="acb-kb-key">G</span><span>Grid on / off</span></div>
+      <div class="acb-kb-row"><span class="acb-kb-key">S</span><span>Save annotated PNG</span></div>
+      <div class="acb-kb-row"><span class="acb-kb-key">B</span><span>Save current pair as a page</span></div>
+      <div class="acb-kb-row"><span class="acb-kb-key">R</span><span>Shuffle a random page</span></div>
+      <div class="acb-kb-row"><span class="acb-kb-key">1</span>&ndash;<span class="acb-kb-key">9</span>&nbsp;<span class="acb-kb-key">0</span><span>Pick pen color</span></div>
+      <div class="acb-kb-row"><span class="acb-kb-key">[</span>&nbsp;<span class="acb-kb-key">]</span><span>Pen smaller / bigger</span></div>
+    </div>
+  </section>
+
+  <section class="acb-section" aria-labelledby="acb-tips-title">
+    <p class="acb-section-eyebrow">Study tips</p>
+    <h2 id="acb-tips-title" class="acb-section-title">Get the most out of it</h2>
+    <ul class="acb-tips">
+      <li><strong>Label from memory first.</strong> Resist the urge to flip the key early. The struggle is where the learning happens. This is the <em>given, not Googled</em> rule we live by in lab.</li>
+      <li><strong>Build modules as we go.</strong> When we finish skeletal, your Skeletal module should hold every image we covered. By Week 8, your book is your exam study guide.</li>
+      <li><strong>Export weekly.</strong> Your book lives in this browser. If you switch devices or clear browser data, you lose it. Hit <strong>Export book</strong> at the end of each week and save the JSON file to Drive or email it to yourself.</li>
+      <li><strong>Shuffle for retrieval practice.</strong> Open Shuffle a Page the night before lab. Random retrieval beats re-reading every time.</li>
+    </ul>
+  </section>
+
+  <footer class="acb-footer">
+    <p class="acb-footer-byline">Dr. Sharilyn Rennie</p>
+    <p class="acb-footer-meta">BIO 004 Human Anatomy &middot; Solano Community College &middot; Summer Intensive</p>
+  </footer>
+
+</section>
+<!-- END CANVAS BODY ============================================== -->
+
+</body>
+</html>

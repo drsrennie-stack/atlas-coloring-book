@@ -135,7 +135,10 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-vis
    Setting touch-action:none on the wrap suppresses Apple Pencil pointer events
    to descendants on some iPadOS Safari builds. */
 .canvas-wrap { --acb-zoom: 1; --acb-pan-x: 0px; --acb-pan-y: 0px; }
-.pane-zoom-content { position: absolute; inset: 0; transform-origin: 0 0; transform: translate(var(--acb-pan-x), var(--acb-pan-y)) scale(var(--acb-zoom)); will-change: transform; }
+/* No transform at default state - it forces a composite layer on iPadOS Safari
+   that can drop Apple Pencil pointer events. Only apply transform when actively zoomed. */
+.pane-zoom-content { position: absolute; inset: 0; transform-origin: 0 0; }
+.canvas-wrap[data-zoomed="true"] .pane-zoom-content { transform: translate(var(--acb-pan-x), var(--acb-pan-y)) scale(var(--acb-zoom)); will-change: transform; }
 .pane-zoom-content.is-animating { transition: transform 240ms ease-out; }
 
 /* Zoom controls (always visible). Buttons work as a guaranteed fallback for iPad/iframe
@@ -808,6 +811,15 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     zoomIndicator.textContent = Math.round(state.zoom * 100) + '%';
     zoomInBtn.disabled  = state.zoom >= ZOOM_MAX - 0.001;
     zoomOutBtn.disabled = state.zoom <= ZOOM_MIN + 0.001;
+    // Only apply CSS transform when actively zoomed. At default (1, 0, 0) the
+    // pane-zoom-content has no transform, so no composite layer is created and
+    // iPadOS Safari delivers Apple Pencil pointer events without dropping.
+    var isZoomed = Math.abs(state.zoom - 1) > 0.001 || state.panX !== 0 || state.panY !== 0;
+    if (isZoomed) {
+      wrap.setAttribute('data-zoomed', 'true');
+    } else {
+      wrap.removeAttribute('data-zoomed');
+    }
     wrap.querySelectorAll('.pane-zoom-content').forEach(function (el) {
       el.classList.toggle('is-animating', !!animate);
     });

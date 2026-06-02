@@ -881,6 +881,10 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     for (var si = 0; si < e.touches.length; si++) {
       if (e.touches[si].touchType === 'stylus') return;
     }
+    // Fallback: touchType is unreliable on some iPad builds. If we're currently
+    // mid-stroke with a pen pointer, protect that stroke - the second "touch" is
+    // almost certainly a palm rest, not a real second-finger pinch.
+    if (state.currentStroke && state.currentPointerType === 'pen') return;
     e.preventDefault();
     // Cancel any in-progress finger stroke when a real two-finger gesture begins
     if (state.currentStroke) state.currentStroke = null;
@@ -1194,6 +1198,10 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       erasing: state.erasing,
       points: [p]
     };
+    // Track which pointer + type is drawing so we can protect this stroke from
+    // accidental cancellation when a palm later lands on the screen.
+    state.currentPointerId   = ev.pointerId;
+    state.currentPointerType = ev.pointerType;
     state.strokes.push(state.currentStroke);
     drawStrokeSegment(state.currentStroke, 0);
   });
@@ -1207,10 +1215,23 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     s.points.push(p);
     drawStrokeSegment(s, prevIdx);
   });
-  function endStroke() { if (state.currentStroke) state.currentStroke = null; }
+  function endStroke(ev) {
+    // Only end the stroke if it's the pointer that started it (or if no pointer info
+    // is available, which is the fallback for older event paths).
+    if (!state.currentStroke) return;
+    if (ev && ev.pointerId != null && state.currentPointerId != null
+        && ev.pointerId !== state.currentPointerId) return;
+    state.currentStroke    = null;
+    state.currentPointerId = null;
+    state.currentPointerType = null;
+  }
   canvas.addEventListener('pointerup',     endStroke);
   canvas.addEventListener('pointercancel', endStroke);
-  canvas.addEventListener('pointerleave',  endStroke);
+  // NOTE: pointerleave intentionally removed. With setPointerCapture set on
+  // pointerdown, the pencil should not generate pointerleave events mid-stroke,
+  // but on some iPadOS builds it can fire when the tip drifts to the canvas edge,
+  // ending a stroke the user is still drawing. pointerup / pointercancel cover the
+  // legitimate lift cases.
   canvas.addEventListener('touchstart', function (e) {
     var t = e.touches && e.touches[0];
     if (t && t.touchType === 'stylus') return;       // Apple Pencil: let pointer events handle it

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canvas iframe Playbook &middot; Atlas Coloring Book</title>
+<style>
+@import url('https://cdn.jsdelivr.net/npm/@fontsource-variable/plus-jakarta-sans/index.css');
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif; background: #FAFAF9; color: #0B1530; line-height: 1.55; }
+a:focus-visible, button:focus-visible { outline: 3px solid #8B3A2E; outline-offset: 3px; border-radius: 4px; }
+
+.site-header { background: #FFFFFF; padding: 18px max(24px, 3vw) 14px; }
+.site-logo { display: inline-flex; align-items: center; gap: 14px; }
+.site-logo svg { height: 44px; width: auto; }
+.logo-text { display: flex; flex-direction: column; gap: 2px; }
+.logo-title { font-size: 19px; font-weight: 800; color: #0B1530; line-height: 1; }
+.logo-title .accent { color: #8B3A2E; }
+.logo-sub { font-size: 10px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; color: #0B1530; opacity: 0.7; }
+
+.hero { background: #FFFFFF; padding: 18px max(24px, 3vw) 24px; }
+.eyebrow { font-size: 10.5px; font-weight: 700; color: #8B3A2E; letter-spacing: 0.28em; text-transform: uppercase; margin: 0 0 10px; }
+.headline { font-size: clamp(26px, 3.2vw, 36px); font-weight: 800; color: #0B1530; line-height: 1.08; margin: 0 0 10px; }
+.headline .accent { color: #8B3A2E; }
+.subhead { font-size: 14.5px; color: #0B1530; line-height: 1.6; opacity: 0.85; margin: 0; max-width: 780px; }
+
+.workspace { padding: 24px max(24px, 3vw) 36px; max-width: 1100px; margin: 0 auto; }
+
+.card { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 10px; box-shadow: 0 1px 3px rgba(11, 21, 48, 0.06); padding: 22px 26px; margin-bottom: 18px; }
+.card-eyebrow { font-size: 10.5px; font-weight: 700; color: #8B3A2E; letter-spacing: 0.20em; text-transform: uppercase; margin: 0 0 4px; }
+.card-title { font-size: 19px; font-weight: 800; color: #0B1530; margin: 0 0 12px; line-height: 1.25; }
+.card-body { font-size: 14px; color: #0B1530; line-height: 1.6; }
+.card-body p { margin: 0 0 10px; }
+.card-body p:last-child { margin-bottom: 0; }
+.card-body strong { color: #0B1530; font-weight: 800; }
+.card-body em { color: #8B3A2E; font-style: normal; font-weight: 700; }
+.card-body code { background: #FAFAF9; border: 1px solid rgba(11, 21, 48, 0.12); border-radius: 3px; padding: 1px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: #0B1530; }
+.card-body ol, .card-body ul { margin: 8px 0 10px; padding-left: 22px; }
+.card-body li { margin: 5px 0; }
+
+.method-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 0 0 22px; }
+.method-tile { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(11, 21, 48, 0.06); display: flex; flex-direction: column; gap: 6px; }
+.method-tile.recommended { border-color: #C9A14A; border-left: 4px solid #C9A14A; }
+.method-tile .method-badge { display: inline-block; font-size: 9.5px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #8B3A2E; }
+.method-tile .method-name { font-size: 15px; font-weight: 800; color: #0B1530; line-height: 1.25; margin: 0; }
+.method-tile .method-when { font-size: 12.5px; color: #0B1530; opacity: 0.78; margin: 0; line-height: 1.5; }
+.method-tile .method-effort { font-size: 10.5px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: #2A6F7A; margin: 6px 0 0; }
+.method-tile.recommended .method-badge { color: #C9A14A; }
+
+.snippet { background: #060A18; color: #FAFAF9; padding: 16px 18px; border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; line-height: 1.6; overflow-x: auto; position: relative; margin: 10px 0 0; }
+.snippet code { color: #FAFAF9; background: transparent; border: none; padding: 0; font-family: inherit; font-size: inherit; }
+.snippet .tok-tag { color: #00E5FF; }
+.snippet .tok-attr { color: #C9A14A; }
+.snippet .tok-val { color: #B6FF1F; }
+.snippet .tok-com { color: #6F7B95; }
+.snippet-actions { position: absolute; top: 8px; right: 8px; }
+.copy-btn { background: rgba(255,255,255,0.12); color: #FAFAF9; border: 1px solid rgba(255,255,255,0.20); border-radius: 4px; padding: 5px 10px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; cursor: pointer; font-family: inherit; }
+.copy-btn:hover { background: rgba(255,255,255,0.20); border-color: #C9A14A; }
+.copy-btn.is-copied { background: #C9A14A; color: #0B1530; border-color: #C9A14A; }
+
+.steps { list-style: none; padding: 0; margin: 12px 0 0; counter-reset: step; display: grid; gap: 10px; }
+.steps li { display: grid; grid-template-columns: 32px 1fr; gap: 14px; align-items: start; padding: 10px 14px; background: #FAFAF9; border-radius: 6px; border-left: 3px solid #8B3A2E; }
+.steps li::before { counter-increment: step; content: counter(step); display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #0B1530; color: #FAFAF9; border-radius: 50%; font-size: 12.5px; font-weight: 800; line-height: 1; align-self: start; margin-top: 2px; }
+.steps li strong { color: #0B1530; font-weight: 800; }
+
+.callout { padding: 12px 16px; background: #FAFAF9; border-left: 3px solid #C9A14A; border-radius: 4px; font-size: 13.5px; line-height: 1.55; margin: 10px 0; }
+.callout strong { color: #8B3A2E; }
+.callout.warn { border-left-color: #C0392B; }
+.callout.warn strong { color: #C0392B; }
+
+.footer { background: #060A18; padding: 22px max(24px, 3vw) 18px; text-align: center; }
+.footer p { margin: 0; }
+.footer-byline { font-size: 10.5px; font-weight: 700; color: #C9A14A; letter-spacing: 0.18em; text-transform: uppercase; }
+.footer-meta { font-size: 11.5px; color: #FAFAF9; opacity: 0.78; margin-top: 6px; }
+
+@media (max-width: 760px) {
+  .method-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="site-logo" aria-label="BIO 004 course identity">
+    <svg viewBox="40 10 125 148" aria-hidden="true" focusable="false">
+      <g transform="translate(0, 18)">
+        <g transform="translate(60, 0) rotate(8 0 130)"><circle cx="0" cy="20" r="10" fill="#0B1530"/><path d="M 0,32 C -10,32 -16,36 -16,42 C -16,55 -13,68 -11,82 C -10,100 -12,118 -14,130 L 14,130 C 12,118 10,100 11,82 C 13,68 16,55 16,42 C 16,36 10,32 0,32 Z" fill="#0B1530"/></g>
+        <g transform="translate(100, 0)"><circle cx="0" cy="10" r="11" fill="#8B3A2E"/><path d="M 0,22 C -11,22 -17,26 -17,34 C -17,52 -14,70 -12,86 C -11,108 -13,122 -15,132 L 15,132 C 13,122 11,108 12,86 C 14,70 17,52 17,34 C 17,26 11,22 0,22 Z" fill="#8B3A2E"/></g>
+        <g transform="translate(140, 0) rotate(-8 0 130)"><circle cx="0" cy="20" r="10" fill="#C9A14A"/><path d="M 0,32 C -10,32 -16,36 -16,42 C -16,55 -13,68 -11,82 C -10,100 -12,118 -14,130 L 14,130 C 12,118 10,100 11,82 C 13,68 16,55 16,42 C 16,36 10,32 0,32 Z" fill="#C9A14A"/></g>
+      </g>
+    </svg>
+    <span class="logo-text">
+      <span class="logo-title">Human <span class="accent">Anatomy</span></span>
+      <span class="logo-sub">BIO 004 &middot; Solano Community College</span>
+    </span>
+  </span>
+</header>
+
+<section class="hero" aria-labelledby="page-title">
+  <p class="eyebrow">Canvas integration &middot; Instructor reference</p>
+  <h1 id="page-title" class="headline">Iframe playbook for the <span class="accent">Atlas Coloring Book</span>.</h1>
+  <p class="subhead">Canvas strips iframes from any domain its admin has not added to a trusted-iframe list. Pasting an iframe pointing at <code style="font-size: 13px; background: #FAFAF9; padding: 1px 5px; border-radius: 3px;">medmasterscollaborative.com</code> into the Canvas HTML editor will silently disappear on save. Three ways around it, ranked by what you can do yourself.</p>
+</section>
+
+<main class="workspace">
+
+  <div class="method-grid" role="list">
+    <article class="method-tile recommended" role="listitem">
+      <span class="method-badge">Method B &middot; Recommended</span>
+      <h2 class="method-name">Canvas Files iframe</h2>
+      <p class="method-when">Upload the HTML to Canvas Files, then iframe its same-origin URL. Canvas always trusts itself.</p>
+      <span class="method-effort">10 minutes, no IT ticket</span>
+    </article>
+    <article class="method-tile" role="listitem">
+      <span class="method-badge">Method A</span>
+      <h2 class="method-name">Trusted-domain iframe</h2>
+      <p class="method-when">Ask Solano Canvas admin to add the host domain to the trusted-iframe list, then paste the iframe HTML.</p>
+      <span class="method-effort">Admin ticket required</span>
+    </article>
+    <article class="method-tile" role="listitem">
+      <span class="method-badge">Method C</span>
+      <h2 class="method-name">External URL module item</h2>
+      <p class="method-when">Skip iframe entirely. Add the tool as a module item that opens in a new tab or fills the Canvas frame.</p>
+      <span class="method-effort">5 minutes, no iframe</span>
+    </article>
+  </div>
+
+  <article class="card" aria-labelledby="iframe-snippet-title">
+    <p class="card-eyebrow">Drop-in code</p>
+    <h2 id="iframe-snippet-title" class="card-title">The iframe snippet</h2>
+    <div class="card-body">
+      <p>This is the iframe you would paste into Canvas's <code>&lt;/&gt;</code> HTML editor. It points at the medmasterscollaborative URL. Replace the <code>src</code> value with your Canvas Files URL if you use Method B.</p>
+      <div class="snippet" id="iframeSnippet">
+        <div class="snippet-actions"><button type="button" class="copy-btn" data-copy-target="iframeSnippetCode">Copy</button></div>
+<pre style="margin:0; white-space: pre-wrap;"><code id="iframeSnippetCode"><span class="tok-com">&lt;!-- Atlas Coloring Book embed --&gt;</span>
+<span class="tok-tag">&lt;iframe</span>
+  <span class="tok-attr">src</span>=<span class="tok-val">"https://www.medmasterscollaborative.com/atlas-coloring-book"</span>
+  <span class="tok-attr">title</span>=<span class="tok-val">"Atlas Coloring Book"</span>
+  <span class="tok-attr">width</span>=<span class="tok-val">"100%"</span>
+  <span class="tok-attr">height</span>=<span class="tok-val">"1600"</span>
+  <span class="tok-attr">loading</span>=<span class="tok-val">"lazy"</span>
+  <span class="tok-attr">allow</span>=<span class="tok-val">"clipboard-write; fullscreen"</span>
+  <span class="tok-attr">style</span>=<span class="tok-val">"border:1px solid #0B1530; border-radius:8px; max-width:1200px; width:100%;"</span>&gt;
+<span class="tok-tag">&lt;/iframe&gt;</span></code></pre>
+      </div>
+      <div class="callout"><strong>Why these attributes:</strong> <code>title</code> is required for screen-reader users (WCAG 4.1.2). <code>loading="lazy"</code> defers loading until the iframe scrolls into view. <code>allow="clipboard-write; fullscreen"</code> permits Save PNG and fullscreen drawing if you ever add it. No <code>sandbox</code> attribute, because the tool needs same-origin storage (IndexedDB) for the bank to persist between visits.</div>
+    </div>
+  </article>
+
+  <article class="card" aria-labelledby="method-b-title">
+    <p class="card-eyebrow">Method B &middot; Recommended</p>
+    <h2 id="method-b-title" class="card-title">Upload to Canvas Files, then iframe</h2>
+    <div class="card-body">
+      <p>Canvas always allows iframes that point at its own domain. So you put the HTML <em>inside</em> Canvas and iframe to it from the same Canvas page. No admin involvement needed.</p>
+      <ol class="steps">
+        <li><span><strong>Open your BIO 004 Canvas course.</strong> Click <em>Files</em> in the left nav.</span></li>
+        <li><span><strong>Upload</strong> <code>atlas-coloring-book.html</code> into a folder of your choice. Make sure the file's visibility is <em>Published</em>.</span></li>
+        <li><span><strong>Right-click the file</strong> in the Files list and choose <em>Copy link address</em>. You will get a URL shaped like <code>https://[your-school].instructure.com/courses/[course-id]/files/[file-id]/preview</code>.</span></li>
+        <li><span><strong>Open the Canvas page</strong> where you want to embed. Switch to the HTML editor (the <code>&lt;/&gt;</code> button at the bottom of the rich content editor).</span></li>
+        <li><span><strong>Paste the iframe snippet above</strong>, but replace the <code>src</code> value with the URL you copied. Save the page.</span></li>
+        <li><span><strong>Set a published students-can-access permission</strong> on the file. Files &rarr; right-click <code>atlas-coloring-book.html</code> &rarr; <em>Manage Usage Rights</em> &rarr; mark as <em>Own creation</em> &rarr; CC-BY or your preferred license, then <em>Publish</em>.</span></li>
+      </ol>
+      <div class="callout"><strong>Note on the bank:</strong> When the tool is served from Canvas's domain, each student's saved bank persists in <em>their</em> browser's IndexedDB under your Canvas domain. Reminder for students to use <em>Export book</em> still applies.</div>
+    </div>
+  </article>
+
+  <article class="card" aria-labelledby="method-a-title">
+    <p class="card-eyebrow">Method A</p>
+    <h2 id="method-a-title" class="card-title">Trusted-domain iframe (admin ticket)</h2>
+    <div class="card-body">
+      <p>If you want the iframe to point at the public <code>medmasterscollaborative.com</code> URL (so the same embed works for all your courses, and updates push automatically), Solano's Canvas admin has to add the domain to the Canvas Rich Content Editor's allowed-domains list.</p>
+      <ol class="steps">
+        <li><span><strong>File a ticket with Solano IT or your Canvas administrator.</strong> Ask them to add <code>medmasterscollaborative.com</code> to the Rich Content Editor's <em>allowed iframe sources</em> at the institutional level (or at minimum, for BIO 004).</span></li>
+        <li><span><strong>Reason for the ticket:</strong> the domain hosts a CC BY-licensed anatomy practice tool you authored, used in BIO 004 lab prep. No PII flow, no tracking, no third-party cookies, IndexedDB-only local storage.</span></li>
+        <li><span><strong>Once approved,</strong> paste the iframe snippet exactly as written and save. Canvas will keep the iframe.</span></li>
+      </ol>
+      <div class="callout warn"><strong>Heads up:</strong> Some Canvas instances strip iframes regardless and require an LTI 1.3 external tool registration instead. If admin says iframes are disabled categorically, fall back to Method B or Method C.</div>
+    </div>
+  </article>
+
+  <article class="card" aria-labelledby="method-c-title">
+    <p class="card-eyebrow">Method C</p>
+    <h2 id="method-c-title" class="card-title">External URL module item (no iframe)</h2>
+    <div class="card-body">
+      <p>The lowest-friction option. You add the tool as a module item that either opens in a new tab or in a Canvas-framed iframe wrapper Canvas itself controls. No HTML editor work.</p>
+      <ol class="steps">
+        <li><span><strong>Go to Modules.</strong> Pick the module you want the tool to live in (Week 1, Lab Prep, etc.).</span></li>
+        <li><span><strong>Click the <em>+</em> button</strong> on the module header and choose <em>External URL</em>.</span></li>
+        <li><span><strong>URL:</strong> <code>https://www.medmasterscollaborative.com/atlas-coloring-book</code>. <strong>Page name:</strong> Atlas Coloring Book.</span></li>
+        <li><span><strong>Check <em>Load in a new tab</em></strong> (most reliable). If you leave it unchecked, Canvas will try to embed in its own iframe wrapper, which usually works for the tool but depends on the destination site's X-Frame-Options header.</span></li>
+        <li><span><strong>Add item</strong> and publish the module item.</span></li>
+      </ol>
+      <div class="callout"><strong>Pairs nicely with your launcher page:</strong> the existing <code>canvas-page-atlas-coloring-book.html</code> works perfectly as a module page that explains the tool and links out. Method C is essentially what that page already does.</div>
+    </div>
+  </article>
+
+  <article class="card" aria-labelledby="github-pages-title">
+    <p class="card-eyebrow">Bonus &middot; If you want a stable hosting fallback</p>
+    <h2 id="github-pages-title" class="card-title">Serve from your GitHub Pages site too</h2>
+    <div class="card-body">
+      <p>You already have the repo at <code>drsrennie-stack/atlas-coloring-book</code>. Turn on GitHub Pages and the same file will be available at <code>https://drsrennie-stack.github.io/atlas-coloring-book/atlas-coloring-book.html</code>. Useful as a redundant URL if Kajabi goes down, and the file there picks up changes the moment you push.</p>
+      <ol class="steps">
+        <li><span><strong>Go to the repo on GitHub.</strong> Click <em>Settings</em> &rarr; <em>Pages</em> in the left sidebar.</span></li>
+        <li><span><strong>Source:</strong> set to <em>Deploy from a branch</em>. Branch: <code>main</code>. Folder: <code>/ (root)</code>. Save.</span></li>
+        <li><span><strong>Wait 30&ndash;60 seconds.</strong> GitHub will give you a URL like <code>https://drsrennie-stack.github.io/atlas-coloring-book/</code>. The HTML file lives at that URL plus its filename.</span></li>
+        <li><span><strong>Update the iframe <code>src</code></strong> (or your Canvas external URL) to the GitHub Pages URL if you prefer it as the canonical address.</span></li>
+      </ol>
+    </div>
+  </article>
+
+</main>
+
+<footer class="footer">
+  <p class="footer-byline">Dr. Sharilyn Rennie</p>
+  <p class="footer-meta">BIO 004 &middot; Canvas Integration Reference &middot; Atlas Coloring Book</p>
+</footer>
+
+<script>
+(function () {
+  document.querySelectorAll('.copy-btn[data-copy-target]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var target = document.getElementById(btn.getAttribute('data-copy-target'));
+      if (!target) return;
+      var text = target.innerText;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { flash(btn); }, function () { fallback(text, btn); });
+      } else {
+        fallback(text, btn);
+      }
+    });
+  });
+  function flash(btn) {
+    var original = btn.textContent;
+    btn.textContent = 'Copied';
+    btn.classList.add('is-copied');
+    setTimeout(function () { btn.textContent = original; btn.classList.remove('is-copied'); }, 1500);
+  }
+  function fallback(text, btn) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); flash(btn); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+})();
+</script>
+
+</body>
+</html>

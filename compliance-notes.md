@@ -142,6 +142,12 @@ The bank stores images and metadata in IndexedDB on this device only. No data is
 3. **Drawing canvas remains pointer-only.** Unchanged from the prior version.
 4. **High-contrast mode override.** Still pending, applies to dialogs as well.
 
+### Stylus-only input mode (2026-06-01 addition)
+
+A toolbar toggle ("Stylus only", keyboard `P`) restricts drawing to pen-type pointers (Apple Pencil, mouse) while leaving finger touches available for browser pinch-zoom. Implementation uses `PointerEvent.pointerType` to gate drawing and Safari's `Touch.touchType === 'stylus'` to keep Apple Pencil events flowing past the touch-event suppressor. When active, the canvas wrap gets `touch-action: pinch-zoom` so the browser handles two-finger zoom natively.
+
+Accessibility: the toggle button has `aria-pressed`, `title` describing behavior, and a keyboard shortcut. A visible "Stylus only" badge appears in the canvas corner when the mode is active, color-inverted between light and dark canvas backgrounds (contrast verified: 17.4:1 on light, 17.4:1 on dark). State persists in `localStorage` under `acb-stylus-only` so iPad users set it once and forget.
+
 ## Canvas launcher page and course card (2026-06-01 addition)
 
 Two student-facing artifacts added to support the BIO 004 Solano launch.
@@ -183,6 +189,37 @@ Contrast on the card:
 | Brushed gold `#C9A14A` accent bar | Off-white `#FAFAF9` | 2.4:1 (decorative, non-text) | meets 1.4.11 |
 
 Type sizes at the mini (262×146) variant: course code 36px, course name 14px, eyebrow 5px. The eyebrow at that size is decorative-only; the course code and name carry the wayfinding load. AA text contrast is preserved at every size.
+
+## Starter library addendum (2026-06-04 addition)
+
+A built-in "Atlas starter library" section was added above the personal coloring book. It ships eight ready-made practice/key pairs for the body-organization unit, served from the same-origin `images/` folder (relative paths, so the canvas stays untainted for PNG export on GitHub Pages or Kajabi). The section reuses the existing `.bank` markup and styling, so all prior bank accessibility properties carry over. New surface area:
+
+### Structure and semantics
+
+The section is `<section class="bank starter" id="starter" aria-labelledby="starter-title">`. Topic groups render as `<section class="bank-module">` with button headers carrying `aria-expanded`. Each pair is an `<article class="bank-entry">` with `aria-label` set to its title. Thumbnails use `loading="lazy"` and empty `alt` (decorative previews; the visible title and notes carry the meaning). A status region `#starterStatus` uses `role="status"` and `aria-live="polite"` to announce add-to-book actions. A hero button "Browse starter library" (`#jumpStarter`) provides a skip-to anchor.
+
+### Controls
+
+Each entry has two buttons: "Load to canvas" (routes through the bank's existing keep-or-fresh load flow, so a student with labels in progress is never silently overwritten) and "Add to my book" (copies the pair into the personal IndexedDB book). The "Add to my book" button updates its label to "In my book" and gains `is-added` styling on success. A header button "Add all to my book" bulk-copies all eight. Starter pages use stable IDs (`preset_xx`), so re-adding overwrites rather than duplicating. The starter library is read-only here; students edit or delete only their own copies in the book below.
+
+### Contrast additions
+
+| Foreground | Background | Ratio | Use | Pass |
+|---|---|---|---|---|
+| Navy `#0B1530` | Brushed gold `#B8924A` | 6.2:1 | "Add all to my book" button | AA |
+| Teal `#2A6F7A` | White `#FFFFFF` | 5.8:1 | "Add to my book" button (rest) | AA |
+| White `#FFFFFF` | Teal `#2A6F7A` | 5.8:1 | "Add to my book" button (hover) | AA |
+| Navy `#1E3D4C` | Navy-tint `#EDF1F3` | 10.1:1 | "In my book" completed state | AAA |
+| Rust `#8B3A2E` | Off-white `#FAFAF9` | 7.3:1 | Starter eyebrow, accents | AAA |
+
+### Keyboard and screen reader
+
+All starter controls are Tab-reachable in document order (between the keyboard-help panel and the personal book) and inherit the global 3px rust `:focus-visible` outline. Module headers toggle on Enter/Space as native buttons. VoiceOver announces each card via its `aria-label`, the DOK chips read inline, and add-to-book confirmations are spoken through the `aria-live` status region.
+
+### Known limitations
+
+1. **Decorative thumbnails.** Starter preview images use `alt=""`; the pedagogical content is conveyed by the title and notes text, not the thumbnail. The full image gains meaning once loaded to the canvas, where labeling is the task.
+2. **Relative image paths.** Starter pages reference `images/...` and resolve only when the `images/` folder is deployed alongside the HTML. If a student exports their book and imports it elsewhere without the images, those entries show broken thumbnails. Pages the student draws and saves as PNG are unaffected.
 
 ## Reviewer
 

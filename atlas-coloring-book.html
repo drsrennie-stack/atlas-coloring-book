@@ -336,6 +336,24 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   .bank-controls { padding: 10px 14px; }
   .bank-body { padding: 12px 14px 16px; }
 }
+
+/* ===== STARTER LIBRARY (built-in image bank) ===== */
+.starter { border-color: rgba(184, 146, 74, 0.55); }
+.starter .bank-header { background: #FAFAF9; border-bottom-color: rgba(184, 146, 74, 0.40); }
+.starter .bank-eyebrow { color: #8B3A2E; opacity: 1; }
+.starter .bank-count { color: #B8924A; }
+.starter-intro { padding: 12px 22px; font-size: 13px; line-height: 1.55; color: #0B1530; opacity: 0.84; background: #FFFFFF; border-bottom: 1px solid rgba(11, 21, 48, 0.10); }
+.starter-intro em { font-style: italic; }
+.starter .bank-entry { border-color: rgba(184, 146, 74, 0.45); }
+.starter .bank-entry:hover { border-color: #B8924A; }
+.starter-status { padding: 0 22px; }
+.starter-status[hidden] { display: none; }
+.starter-status p { margin: 0 0 12px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: #2A6F7A; }
+.bank-entry-actions button.add-book { background: #FFFFFF; color: #2A6F7A; border-color: #2A6F7A; }
+.bank-entry-actions button.add-book:hover { background: #2A6F7A; color: #FFFFFF; border-color: #2A6F7A; }
+.bank-entry-actions button.add-book.is-added { background: #EDF1F3; color: #1E3D4C; border-color: #1E3D4C; cursor: default; }
+.action-btn.add-all { background: #B8924A; color: #0B1530; border-color: #B8924A; font-weight: 800; }
+.action-btn.add-all:hover { background: #A07F3E; border-color: #A07F3E; color: #0B1530; }
 </style>
 </head>
 <body>
@@ -362,6 +380,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     <button type="button" id="savePNG">Save annotated PNG</button>
     <button type="button" class="ghost" id="clearDraw">Clear my labels</button>
     <button type="button" class="ghost" id="resetAll">Reset session</button>
+    <button type="button" class="ghost" id="jumpStarter">Browse starter library</button>
     <button type="button" class="ghost" id="jumpBank">Jump to my book</button>
   </div>
 </section>
@@ -514,6 +533,21 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       <div class="kb-row"><span class="kb-key">B</span><span>Save current pair as a page</span></div>
       <div class="kb-row"><span class="kb-key">R</span><span>Shuffle a page (uses current filters)</span></div>
     </div>
+  </section>
+
+  <section class="bank starter" id="starter" aria-labelledby="starter-title">
+    <header class="bank-header">
+      <div>
+        <p class="bank-eyebrow">Starter library &middot; Ready-made pages</p>
+        <h2 id="starter-title" class="bank-title">Atlas starter library<span class="bank-count" id="starterCount">(0)</span></h2>
+      </div>
+      <div class="bank-actions">
+        <button type="button" class="action-btn add-all" id="addAllStarterBtn">Add all to my book</button>
+      </div>
+    </header>
+    <p class="starter-intro">Built-in practice pages for the body-organization unit. <em>Load to canvas</em> opens a pair right away so you can label the unlabeled image, then toggle the answer key to check yourself. <em>Add to my book</em> copies the page into your own library below, where you can shuffle and search it alongside pages you save.</p>
+    <div class="starter-status" id="starterStatus" role="status" aria-live="polite" hidden></div>
+    <div class="bank-body" id="starterBody"></div>
   </section>
 
   <section class="bank" id="bank" aria-labelledby="bank-title">
@@ -1955,8 +1989,265 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     }
   });
 
+  // ---- Expose API for the starter-library module ----
+  // loadEntry: route a preset through the same keep/fresh prompt + canvas load + context strip.
+  window.atlasBank.loadEntry = requestLoadEntry;
+  // addToBook: copy a preset into the student's personal IndexedDB book.
+  // Preset ids are stable (preset_xx), so re-adding overwrites rather than duplicating.
+  window.atlasBank.addToBook = function (entry) {
+    var now = Date.now();
+    var rec = {
+      id:     entry.id || uid(),
+      title:  String(entry.title  || 'Untitled').slice(0, 200),
+      module: String(entry.module || 'Unsorted').slice(0, 120),
+      notes:  String(entry.notes  || '').slice(0, 1000),
+      dok:    entry.dok ? parseInt(entry.dok, 10) : null,
+      source: String(entry.source || '').slice(0, 400),
+      practiceURL: entry.practiceURL,
+      keyURL: entry.keyURL,
+      createdAt: now,
+      updatedAt: now
+    };
+    return dbPut(rec).then(function () { renderBank(); return rec; });
+  };
+  window.atlasBank.refresh = renderBank;
+
   // ---- Initial render ----
   renderBank();
+})();
+
+/* ===============================================================
+   STARTER LIBRARY MODULE
+   - Built-in practice/key pairs shipped with the atlas (images/ folder).
+   - "Load to canvas" routes through the bank's keep/fresh load flow.
+   - "Add to my book" copies a pair into the student's personal book.
+   - Read-only: students cannot edit or delete starter pages here.
+   =============================================================== */
+(function () {
+  'use strict';
+
+  // Each pair points at same-origin files in ./images/. On GitHub Pages / Kajabi
+  // these resolve relative to the page, so the canvas stays untainted for PNG export.
+  var PRESETS = [
+    {
+      id: 'preset_01_levels_of_organization',
+      module: 'Introduction & Body Organization',
+      title: 'Levels of structural organization',
+      dok: 1,
+      notes: 'Label the levels from simplest to most complex: chemical, cellular, tissue, organ, organ system, and organismal.',
+      source: 'BIO 004 Atlas slide bank',
+      practiceURL: 'images/01-levels-of-organization-practice.jpeg',
+      keyURL:      'images/01-levels-of-organization-key.jpeg'
+    },
+    {
+      id: 'preset_02_anatomical_position',
+      module: 'Introduction & Body Organization',
+      title: 'Anatomical position (anterior & lateral)',
+      dok: 1,
+      notes: 'Annotate the defining features: body erect, head and toes forward, feet flat and slightly apart, arms at the sides with palms facing forward. This reference slide has no separate key.',
+      source: 'BIO 004 Atlas slide bank',
+      practiceURL: 'images/02-anatomical-position.jpeg',
+      keyURL:      'images/02-anatomical-position.jpeg'
+    },
+    {
+      id: 'preset_03_body_cavities',
+      module: 'Introduction & Body Organization',
+      title: 'Body cavities (lateral & anterior)',
+      dok: 2,
+      notes: 'Label the dorsal cavity (cranial, vertebral) and ventral cavity (thoracic: pleural, pericardial, mediastinum; abdominopelvic: abdominal, pelvic). Mark the diaphragm.',
+      source: 'BIO 004 Atlas slide bank',
+      practiceURL: 'images/03-body-cavities-practice.jpeg',
+      keyURL:      'images/03-body-cavities-key.jpeg'
+    },
+    {
+      id: 'preset_04_regional_terms_anterior',
+      module: 'Introduction & Body Organization',
+      title: 'Regional terms, anterior view',
+      dok: 1,
+      notes: 'Label anterior body regions: cephalic, cervical, thoracic, brachial, antecubital, antebrachial, carpal, digital, abdominal, pelvic, pubic, femoral, patellar, crural, fibular, and plantar.',
+      source: 'BIO 004 Atlas slide bank',
+      practiceURL: 'images/04-regional-terms-anterior-practice.jpeg',
+      keyURL:      'images/04-regional-terms-anterior-key.jpeg'
+    },
+    {
+      id: 'preset_05_regional_terms_posterior',
+      module: 'Introduction & Body Organization',
+      title: 'Regional terms, posterior view',
+      dok: 1,
+      notes: 'Label posterior body regions: cephalic, occipital, cervical, scapular, vertebral, lumbar, sacral, gluteal, femoral, popliteal, sural, calcaneal, and plantar.',
+      source: 'BIO 004 Atlas slide bank',
+      practiceURL: 'images/05-regional-terms-posterior-practice.jpeg',
+      keyURL:      'images/05-regional-terms-posterior-key.jpeg'
+    },
+    {
+      id: 'preset_06_directional_terms_and_planes',
+      module: 'Introduction & Body Organization',
+      title: 'Directional terms & body planes',
+      dok: 2,
+      notes: 'Label the planes (sagittal, midsagittal/median, frontal/coronal, transverse) and directional terms (superior, inferior, anterior/ventral, posterior/dorsal, medial, lateral, proximal, distal).',
+      source: 'BIO 004 Atlas slide bank',
+      practiceURL: 'images/06-directional-terms-and-planes-practice.jpeg',
+      keyURL:      'images/06-directional-terms-and-planes-key.jpeg'
+    },
+    {
+      id: 'preset_07_abdominopelvic_quadrants',
+      module: 'Introduction & Body Organization',
+      title: 'Abdominopelvic quadrants',
+      dok: 2,
+      notes: 'Label the four quadrants (RUQ, LUQ, RLQ, LLQ) and name the major organs found in each.',
+      source: 'BIO 004 Atlas slide bank',
+      practiceURL: 'images/07-abdominopelvic-quadrants-practice.jpeg',
+      keyURL:      'images/07-abdominopelvic-quadrants-key.jpeg'
+    },
+    {
+      id: 'preset_08_animal_cell_structure',
+      module: 'Introduction & Histology',
+      title: 'Animal cell structure',
+      dok: 1,
+      notes: 'Label the organelles: plasma membrane, cytoplasm, cytosol, nucleus, nucleolus, nuclear envelope, rough and smooth ER, ribosomes, Golgi apparatus, vesicles, lysosome, peroxisome, mitochondria, and centrosome.',
+      source: 'BIO 004 Atlas slide bank',
+      practiceURL: 'images/08-animal-cell-structure-practice.jpeg',
+      keyURL:      'images/08-animal-cell-structure-key.jpeg'
+    }
+  ];
+
+  var starterBody   = document.getElementById('starterBody');
+  var starterCount  = document.getElementById('starterCount');
+  var starterStatus = document.getElementById('starterStatus');
+  var addAllBtn     = document.getElementById('addAllStarterBtn');
+  var jumpStarter   = document.getElementById('jumpStarter');
+
+  if (!starterBody) return;
+
+  function escapeHTML(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+
+  function announce(msg) {
+    if (!starterStatus) return;
+    starterStatus.innerHTML = '<p>' + escapeHTML(msg) + '</p>';
+    starterStatus.hidden = false;
+  }
+
+  function bankReady() {
+    return window.atlasBank && typeof window.atlasBank.addToBook === 'function';
+  }
+
+  function render() {
+    starterCount.textContent = '(' + PRESETS.length + ')';
+
+    // Group by module, preserving PRESETS order within each group.
+    var order = [];
+    var groups = {};
+    PRESETS.forEach(function (p) {
+      var m = p.module || 'Unsorted';
+      if (!groups[m]) { groups[m] = []; order.push(m); }
+      groups[m].push(p);
+    });
+
+    starterBody.innerHTML = '';
+    order.forEach(function (m) {
+      var moduleEl = document.createElement('section');
+      moduleEl.className = 'bank-module';
+      moduleEl.setAttribute('data-collapsed', 'false');
+
+      var header = document.createElement('button');
+      header.type = 'button';
+      header.className = 'bank-module-header';
+      header.setAttribute('aria-expanded', 'true');
+      header.innerHTML =
+        '<span class="bank-module-caret" aria-hidden="true"></span>' +
+        '<span class="bank-module-name">' + escapeHTML(m) + '</span>' +
+        '<span class="bank-module-count">' + groups[m].length + ' page' + (groups[m].length === 1 ? '' : 's') + '</span>';
+      header.addEventListener('click', function () {
+        var collapsed = moduleEl.getAttribute('data-collapsed') === 'true';
+        moduleEl.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+        header.setAttribute('aria-expanded', collapsed ? 'true' : 'false');
+      });
+      moduleEl.appendChild(header);
+
+      var entriesEl = document.createElement('div');
+      entriesEl.className = 'bank-entries';
+
+      groups[m].forEach(function (preset) {
+        var card = document.createElement('article');
+        card.className = 'bank-entry';
+        card.setAttribute('aria-label', preset.title);
+
+        var thumbs = document.createElement('div');
+        thumbs.className = 'bank-entry-thumbs';
+        thumbs.innerHTML =
+          '<div class="bank-entry-thumb"><span class="bank-entry-thumb-label">Practice</span><img alt="" loading="lazy" src="' + escapeHTML(preset.practiceURL) + '"></div>' +
+          '<div class="bank-entry-thumb"><span class="bank-entry-thumb-label">Key</span><img alt="" loading="lazy" src="' + escapeHTML(preset.keyURL) + '"></div>';
+        card.appendChild(thumbs);
+
+        var meta = document.createElement('div');
+        meta.className = 'bank-entry-meta';
+        var titleRow = '<div class="bank-entry-title-row"><span class="bank-entry-title">' + escapeHTML(preset.title) + '</span>';
+        if (preset.dok) titleRow += '<span class="dok-chip dok-' + preset.dok + '">DOK ' + preset.dok + '</span>';
+        titleRow += '</div>';
+        var notesHtml  = preset.notes  ? '<p class="bank-entry-notes">'  + escapeHTML(preset.notes)  + '</p>' : '';
+        var sourceHtml = preset.source ? '<p class="bank-entry-source">' + escapeHTML(preset.source) + '</p>' : '';
+        meta.innerHTML = titleRow + notesHtml + sourceHtml;
+        card.appendChild(meta);
+
+        var actions = document.createElement('div');
+        actions.className = 'bank-entry-actions';
+
+        var loadBtn = document.createElement('button');
+        loadBtn.type = 'button'; loadBtn.className = 'primary'; loadBtn.textContent = 'Load to canvas';
+        loadBtn.addEventListener('click', function () {
+          if (window.atlasBank && typeof window.atlasBank.loadEntry === 'function') {
+            window.atlasBank.loadEntry(preset);
+          }
+        });
+
+        var addBtn = document.createElement('button');
+        addBtn.type = 'button'; addBtn.className = 'add-book'; addBtn.textContent = 'Add to my book';
+        addBtn.setAttribute('aria-label', 'Add ' + preset.title + ' to my book');
+        addBtn.addEventListener('click', function () {
+          if (!bankReady()) { announce('Your book is not ready yet. Try again in a moment.'); return; }
+          window.atlasBank.addToBook(preset).then(function () {
+            addBtn.classList.add('is-added');
+            addBtn.textContent = 'In my book';
+            announce('Added "' + preset.title + '" to your coloring book.');
+          });
+        });
+
+        actions.appendChild(loadBtn);
+        actions.appendChild(addBtn);
+        card.appendChild(actions);
+
+        entriesEl.appendChild(card);
+      });
+
+      moduleEl.appendChild(entriesEl);
+      starterBody.appendChild(moduleEl);
+    });
+  }
+
+  if (addAllBtn) {
+    addAllBtn.addEventListener('click', function () {
+      if (!bankReady()) { announce('Your book is not ready yet. Try again in a moment.'); return; }
+      Promise.all(PRESETS.map(function (p) { return window.atlasBank.addToBook(p); })).then(function () {
+        announce('Added all ' + PRESETS.length + ' starter pages to your coloring book.');
+        starterBody.querySelectorAll('.bank-entry-actions .add-book').forEach(function (b) {
+          b.classList.add('is-added'); b.textContent = 'In my book';
+        });
+      });
+    });
+  }
+
+  if (jumpStarter) {
+    jumpStarter.addEventListener('click', function () {
+      var s = document.getElementById('starter');
+      if (s && s.scrollIntoView) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  render();
 })();
 
 // Iframe height sender (Kajabi / GitHub Pages embed compatibility)

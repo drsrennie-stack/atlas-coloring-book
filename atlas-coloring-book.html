@@ -2018,7 +2018,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
 
 /* ===============================================================
    STARTER LIBRARY MODULE
-   - Built-in practice/key pairs shipped with the atlas (images/ folder).
+   - Built-in practice/key pairs shipped with the atlas (image files sit beside this HTML).
    - "Load to canvas" routes through the bank's keep/fresh load flow.
    - "Add to my book" copies a pair into the student's personal book.
    - Read-only: students cannot edit or delete starter pages here.
@@ -2026,8 +2026,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
 (function () {
   'use strict';
 
-  // Each pair points at same-origin files in ./images/. On GitHub Pages / Kajabi
-  // these resolve relative to the page, so the canvas stays untainted for PNG export.
+  // Each pair points at same-origin files beside this HTML (repo root). On GitHub
+  // Pages / Kajabi these resolve relative to the page, so the canvas stays untainted for PNG export.
   var PRESETS = [
     {
       id: 'preset_01_levels_of_organization',
@@ -2036,8 +2036,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       dok: 1,
       notes: 'Label the levels from simplest to most complex: chemical, cellular, tissue, organ, organ system, and organismal.',
       source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'images/01-levels-of-organization-practice.jpeg',
-      keyURL:      'images/01-levels-of-organization-key.jpeg'
+      practiceURL: '01-levels-of-organization-practice.jpeg',
+      keyURL:      '01-levels-of-organization-key.jpeg'
     },
     {
       id: 'preset_02_anatomical_position',
@@ -2046,8 +2046,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       dok: 1,
       notes: 'Annotate the defining features: body erect, head and toes forward, feet flat and slightly apart, arms at the sides with palms facing forward. This reference slide has no separate key.',
       source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'images/02-anatomical-position.jpeg',
-      keyURL:      'images/02-anatomical-position.jpeg'
+      practiceURL: '02-anatomical-position.jpeg',
+      keyURL:      '02-anatomical-position.jpeg'
     },
     {
       id: 'preset_03_body_cavities',
@@ -2056,8 +2056,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       dok: 2,
       notes: 'Label the dorsal cavity (cranial, vertebral) and ventral cavity (thoracic: pleural, pericardial, mediastinum; abdominopelvic: abdominal, pelvic). Mark the diaphragm.',
       source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'images/03-body-cavities-practice.jpeg',
-      keyURL:      'images/03-body-cavities-key.jpeg'
+      practiceURL: '03-body-cavities-practice.jpeg',
+      keyURL:      '03-body-cavities-key.jpeg'
     },
     {
       id: 'preset_04_regional_terms_anterior',
@@ -2066,8 +2066,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       dok: 1,
       notes: 'Label anterior body regions: cephalic, cervical, thoracic, brachial, antecubital, antebrachial, carpal, digital, abdominal, pelvic, pubic, femoral, patellar, crural, fibular, and plantar.',
       source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'images/04-regional-terms-anterior-practice.jpeg',
-      keyURL:      'images/04-regional-terms-anterior-key.jpeg'
+      practiceURL: '04-regional-terms-anterior-practice.jpeg',
+      keyURL:      '04-regional-terms-anterior-key.jpeg'
     },
     {
       id: 'preset_05_regional_terms_posterior',
@@ -2076,8 +2076,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       dok: 1,
       notes: 'Label posterior body regions: cephalic, occipital, cervical, scapular, vertebral, lumbar, sacral, gluteal, femoral, popliteal, sural, calcaneal, and plantar.',
       source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'images/05-regional-terms-posterior-practice.jpeg',
-      keyURL:      'images/05-regional-terms-posterior-key.jpeg'
+      practiceURL: '05-regional-terms-posterior-practice.jpeg',
+      keyURL:      '05-regional-terms-posterior-key.jpeg'
     },
     {
       id: 'preset_06_directional_terms_and_planes',
@@ -2086,8 +2086,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       dok: 2,
       notes: 'Label the planes (sagittal, midsagittal/median, frontal/coronal, transverse) and directional terms (superior, inferior, anterior/ventral, posterior/dorsal, medial, lateral, proximal, distal).',
       source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'images/06-directional-terms-and-planes-practice.jpeg',
-      keyURL:      'images/06-directional-terms-and-planes-key.jpeg'
+      practiceURL: '06-directional-terms-and-planes-practice.jpeg',
+      keyURL:      '06-directional-terms-and-planes-key.jpeg'
     },
     {
       id: 'preset_07_abdominopelvic_quadrants',
@@ -2096,8 +2096,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       dok: 2,
       notes: 'Label the four quadrants (RUQ, LUQ, RLQ, LLQ) and name the major organs found in each.',
       source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'images/07-abdominopelvic-quadrants-practice.jpeg',
-      keyURL:      'images/07-abdominopelvic-quadrants-key.jpeg'
+      practiceURL: '07-abdominopelvic-quadrants-practice.jpeg',
+      keyURL:      '07-abdominopelvic-quadrants-key.jpeg'
     },
     {
       id: 'preset_08_animal_cell_structure',
@@ -2106,8 +2106,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
       dok: 1,
       notes: 'Label the organelles: plasma membrane, cytoplasm, cytosol, nucleus, nucleolus, nuclear envelope, rough and smooth ER, ribosomes, Golgi apparatus, vesicles, lysosome, peroxisome, mitochondria, and centrosome.',
       source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'images/08-animal-cell-structure-practice.jpeg',
-      keyURL:      'images/08-animal-cell-structure-key.jpeg'
+      practiceURL: '08-animal-cell-structure-practice.jpeg',
+      keyURL:      '08-animal-cell-structure-key.jpeg'
     }
   ];
 

@@ -158,6 +158,11 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-vis
 /* Pane structure: in single mode, panes overlap and only one is visible at a time.
    In side-by-side mode, panes split the wrap 50/50 (or stack vertically on narrow screens). */
 .canvas-pane { position: absolute; inset: 0; overflow: hidden; }
+/* The answer-key pane overlaps the practice pane in single view. It has nothing
+   clickable in it, so make it transparent to pointer/stylus events. Otherwise the
+   key pane swallows every pen and finger event before it reaches the drawing canvas
+   underneath, which makes the Pencil unable to draw (it can only select). */
+.pane-key { pointer-events: none; }
 .pane-label { position: absolute; left: 10px; top: 10px; padding: 3px 9px; font-size: 9.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; background: rgba(11, 21, 48, 0.86); color: #FAFAF9; border-radius: 999px; pointer-events: none; z-index: 3; opacity: 0; transition: opacity 180ms ease; }
 .pane-label.is-key { background: rgba(139, 58, 46, 0.92); }
 .canvas-wrap.is-dark .pane-label { background: rgba(250, 250, 249, 0.92); color: #0B1530; }
@@ -354,6 +359,18 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
 .bank-entry-actions button.add-book.is-added { background: #EDF1F3; color: #1E3D4C; border-color: #1E3D4C; cursor: default; }
 .action-btn.add-all { background: #B8924A; color: #0B1530; border-color: #B8924A; font-weight: 800; }
 .action-btn.add-all:hover { background: #A07F3E; border-color: #A07F3E; color: #0B1530; }
+.action-btn.cat-tool { background: #FFFFFF; color: #0B1530; border-color: rgba(11,21,48,0.22); }
+.action-btn.cat-tool:hover { border-color: #8B3A2E; color: #8B3A2E; }
+.action-btn.add-page { background: #2A6F7A; color: #FFFFFF; border-color: #2A6F7A; }
+.action-btn.add-page:hover { background: #225A63; border-color: #225A63; color: #FFFFFF; }
+.bank-entry-tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; background: #EAF1F2; color: #225A63; border: 1px solid #2A6F7A; margin-left: 6px; }
+.bank-entry-actions button.danger:hover { border-color: #C0392B; color: #C0392B; }
+.bank-entry-cat { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.bank-entry-cat > span { font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #0B1530; opacity: 0.55; white-space: nowrap; }
+.bank-entry-cat select { flex: 1 1 auto; min-width: 0; padding: 5px 8px; border: 1px solid rgba(11, 21, 48, 0.22); border-radius: 4px; font-family: inherit; font-size: 12px; color: #0B1530; background: #FFFFFF; cursor: pointer; }
+.bank-entry-cat select:focus { outline: none; border-color: #8B3A2E; box-shadow: 0 0 0 2px rgba(139,58,46,0.18); }
+.starter-savehint { padding: 0 22px 12px; margin: 0; font-size: 11.5px; line-height: 1.5; color: #0B1530; opacity: 0.72; }
+.starter-savehint strong { color: #8B3A2E; }
 </style>
 </head>
 <body>
@@ -542,10 +559,16 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
         <h2 id="starter-title" class="bank-title">Atlas starter library<span class="bank-count" id="starterCount">(0)</span></h2>
       </div>
       <div class="bank-actions">
+        <button type="button" class="action-btn add-page" id="addPageBtn">+ Add a page</button>
+        <button type="button" class="action-btn cat-tool" id="exportCatsBtn" title="Download your category sorting and added pages so they can be made permanent for students">Export sorting</button>
+        <button type="button" class="action-btn cat-tool" id="importCatsBtn">Import sorting</button>
+        <input type="file" id="importCatsFile" accept="application/json" hidden>
+        <button type="button" class="action-btn cat-tool" id="resetCatsBtn" title="Revert every page to its built-in category">Reset</button>
         <button type="button" class="action-btn add-all" id="addAllStarterBtn">Add all to my book</button>
       </div>
     </header>
-    <p class="starter-intro">Built-in practice pages for the body-organization unit. <em>Load to canvas</em> opens a pair right away so you can label the unlabeled image, then toggle the answer key to check yourself. <em>Add to my book</em> copies the page into your own library below, where you can shuffle and search it alongside pages you save.</p>
+    <p class="starter-intro">Built-in practice pages, grouped by category. <em>Load to canvas</em> opens a pair so you can label it, then toggle the answer key to check. <em>Add to my book</em> copies it into your own library below. Each card has a <em>Category</em> dropdown: re-file any page, or pick <em>+ New category</em> to make your own. A <em>Cadaver</em> category is built in.</p>
+    <p class="starter-savehint"><strong>Note:</strong> your category changes save on this device. To make them permanent for students, click <strong>Export sorting</strong> and send the file back so it can be baked into the published page.</p>
     <div class="starter-status" id="starterStatus" role="status" aria-live="polite" hidden></div>
     <div class="bank-body" id="starterBody"></div>
   </section>
@@ -609,6 +632,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   <option value="Digestive System"></option>
   <option value="Urinary System"></option>
   <option value="Reproductive System"></option>
+  <option value="Cadaver"></option>
 </datalist>
 
 <dialog class="atlas-dialog" id="saveDialog" aria-labelledby="saveDialogTitle">
@@ -675,6 +699,56 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     <button type="button" id="loadKeepBtn">Keep my labels</button>
     <button type="button" class="primary" id="loadFreshBtn">Start fresh</button>
   </footer>
+</dialog>
+
+<dialog class="atlas-dialog" id="addPageDialog" aria-labelledby="addPageTitle">
+  <form id="addPageForm" method="dialog">
+    <header class="dlg-header">
+      <div>
+        <p class="dlg-eyebrow">Starter library</p>
+        <h2 class="dlg-title" id="addPageTitle">Add a page</h2>
+      </div>
+      <button type="button" class="dlg-close" aria-label="Close add-page dialog" data-dlg-close>&times;</button>
+    </header>
+    <div class="dlg-body">
+      <p class="dlg-message">Upload your two image files to the repository first, then type their file names below. Use the unlabeled image as <strong>Practice</strong> and the labeled image as <strong>Answer key</strong>.</p>
+      <div class="dlg-field">
+        <label for="apTitle">Title <span class="dlg-hint">(required)</span></label>
+        <input type="text" id="apTitle" required maxlength="120" autocomplete="off" placeholder="e.g., Compact bone histology">
+      </div>
+      <div class="dlg-field">
+        <label for="apModule">Category <span class="dlg-hint">(type or pick &middot; e.g., Cadaver, Skeletal System)</span></label>
+        <input type="text" id="apModule" list="moduleSuggestions" maxlength="80" autocomplete="off" placeholder="e.g., Skeletal System">
+      </div>
+      <div class="dlg-field">
+        <label for="apPractice">Practice image file <span class="dlg-hint">(file name in your repo, or a full https link)</span></label>
+        <input type="text" id="apPractice" required autocomplete="off" placeholder="e.g., 44-compact-bone-practice.jpg">
+      </div>
+      <div class="dlg-field">
+        <label for="apKey">Answer-key image file <span class="dlg-hint">(leave blank to reuse the practice image)</span></label>
+        <input type="text" id="apKey" autocomplete="off" placeholder="e.g., 44-compact-bone-key.jpg">
+      </div>
+      <div class="dlg-field">
+        <label for="apNotes">Notes / study prompt <span class="dlg-hint">(optional)</span></label>
+        <textarea id="apNotes" maxlength="500" placeholder="e.g., Label the osteon, lamellae, lacunae, and central canal."></textarea>
+      </div>
+      <div class="dlg-field">
+        <label for="apDok">DOK level <span class="dlg-hint">(optional)</span></label>
+        <select id="apDok">
+          <option value="1" selected>DOK 1 &middot; Recall &amp; reproduce</option>
+          <option value="2">DOK 2 &middot; Skills &amp; concepts</option>
+          <option value="3">DOK 3 &middot; Strategic thinking</option>
+          <option value="4">DOK 4 &middot; Extended thinking</option>
+          <option value="">No level set</option>
+        </select>
+      </div>
+      <p class="dlg-hint" id="apBaseHint" style="margin:0;"></p>
+    </div>
+    <footer class="dlg-footer">
+      <button type="button" data-dlg-close>Cancel</button>
+      <button type="submit" class="primary" id="apSubmit">Add page</button>
+    </footer>
+  </form>
 </dialog>
 
 <footer class="footer-section">
@@ -2029,86 +2103,49 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   // Each pair points at same-origin files beside this HTML (repo root). On GitHub
   // Pages / Kajabi these resolve relative to the page, so the canvas stays untainted for PNG export.
   var PRESETS = [
-    {
-      id: 'preset_01_levels_of_organization',
-      module: 'Introduction & Body Organization',
-      title: 'Levels of structural organization',
-      dok: 1,
-      notes: 'Label the levels from simplest to most complex: chemical, cellular, tissue, organ, organ system, and organismal.',
-      source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'https://drsrennie-stack.github.io/atlas-coloring-book/01-levels-of-organization-practice.jpeg',
-      keyURL:      'https://drsrennie-stack.github.io/atlas-coloring-book/01-levels-of-organization-key.jpeg'
-    },
-    {
-      id: 'preset_02_anatomical_position',
-      module: 'Introduction & Body Organization',
-      title: 'Anatomical position (anterior & lateral)',
-      dok: 1,
-      notes: 'Annotate the defining features: body erect, head and toes forward, feet flat and slightly apart, arms at the sides with palms facing forward. This reference slide has no separate key.',
-      source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'https://drsrennie-stack.github.io/atlas-coloring-book/02-anatomical-position.jpeg',
-      keyURL:      'https://drsrennie-stack.github.io/atlas-coloring-book/02-anatomical-position.jpeg'
-    },
-    {
-      id: 'preset_03_body_cavities',
-      module: 'Introduction & Body Organization',
-      title: 'Body cavities (lateral & anterior)',
-      dok: 2,
-      notes: 'Label the dorsal cavity (cranial, vertebral) and ventral cavity (thoracic: pleural, pericardial, mediastinum; abdominopelvic: abdominal, pelvic). Mark the diaphragm.',
-      source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'https://drsrennie-stack.github.io/atlas-coloring-book/03-body-cavities-practice.jpeg',
-      keyURL:      'https://drsrennie-stack.github.io/atlas-coloring-book/03-body-cavities-key.jpeg'
-    },
-    {
-      id: 'preset_04_regional_terms_anterior',
-      module: 'Introduction & Body Organization',
-      title: 'Regional terms, anterior view',
-      dok: 1,
-      notes: 'Label anterior body regions: cephalic, cervical, thoracic, brachial, antecubital, antebrachial, carpal, digital, abdominal, pelvic, pubic, femoral, patellar, crural, fibular, and plantar.',
-      source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'https://drsrennie-stack.github.io/atlas-coloring-book/04-regional-terms-anterior-practice.jpeg',
-      keyURL:      'https://drsrennie-stack.github.io/atlas-coloring-book/04-regional-terms-anterior-key.jpeg'
-    },
-    {
-      id: 'preset_05_regional_terms_posterior',
-      module: 'Introduction & Body Organization',
-      title: 'Regional terms, posterior view',
-      dok: 1,
-      notes: 'Label posterior body regions: cephalic, occipital, cervical, scapular, vertebral, lumbar, sacral, gluteal, femoral, popliteal, sural, calcaneal, and plantar.',
-      source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'https://drsrennie-stack.github.io/atlas-coloring-book/05-regional-terms-posterior-practice.jpeg',
-      keyURL:      'https://drsrennie-stack.github.io/atlas-coloring-book/05-regional-terms-posterior-key.jpeg'
-    },
-    {
-      id: 'preset_06_directional_terms_and_planes',
-      module: 'Introduction & Body Organization',
-      title: 'Directional terms & body planes',
-      dok: 2,
-      notes: 'Label the planes (sagittal, midsagittal/median, frontal/coronal, transverse) and directional terms (superior, inferior, anterior/ventral, posterior/dorsal, medial, lateral, proximal, distal).',
-      source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'https://drsrennie-stack.github.io/atlas-coloring-book/06-directional-terms-and-planes-practice.jpeg',
-      keyURL:      'https://drsrennie-stack.github.io/atlas-coloring-book/06-directional-terms-and-planes-key.jpeg'
-    },
-    {
-      id: 'preset_07_abdominopelvic_quadrants',
-      module: 'Introduction & Body Organization',
-      title: 'Abdominopelvic quadrants',
-      dok: 2,
-      notes: 'Label the four quadrants (RUQ, LUQ, RLQ, LLQ) and name the major organs found in each.',
-      source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'https://drsrennie-stack.github.io/atlas-coloring-book/07-abdominopelvic-quadrants-practice.jpeg',
-      keyURL:      'https://drsrennie-stack.github.io/atlas-coloring-book/07-abdominopelvic-quadrants-key.jpeg'
-    },
-    {
-      id: 'preset_08_animal_cell_structure',
-      module: 'Introduction & Histology',
-      title: 'Animal cell structure',
-      dok: 1,
-      notes: 'Label the organelles: plasma membrane, cytoplasm, cytosol, nucleus, nucleolus, nuclear envelope, rough and smooth ER, ribosomes, Golgi apparatus, vesicles, lysosome, peroxisome, mitochondria, and centrosome.',
-      source: 'BIO 004 Atlas slide bank',
-      practiceURL: 'https://drsrennie-stack.github.io/atlas-coloring-book/08-animal-cell-structure-practice.jpeg',
-      keyURL:      'https://drsrennie-stack.github.io/atlas-coloring-book/08-animal-cell-structure-key.jpeg'
-    }
+    {"id": "preset_01_levels_of_structural_organization", "module": "Introduction & Body Organization", "title": "Levels of structural organization", "dok": 1, "notes": "Label the levels from simplest to most complex: chemical, cellular, tissue, organ, organ system, and organismal.", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/01-levels-of-organization-practice.jpeg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/01-levels-of-organization-key.jpeg"},
+    {"id": "preset_02_anatomical_position_anterior_lateral", "module": "Introduction & Body Organization", "title": "Anatomical position (anterior & lateral)", "dok": 1, "notes": "Annotate the defining features: body erect, head and toes forward, feet flat and slightly apart, arms at the sides with palms facing forward. This reference slide has no separate key.", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/02-anatomical-position.jpeg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/02-anatomical-position.jpeg"},
+    {"id": "preset_03_body_cavities_lateral_anterior", "module": "Introduction & Body Organization", "title": "Body cavities (lateral & anterior)", "dok": 2, "notes": "Label the dorsal cavity (cranial, vertebral) and ventral cavity (thoracic: pleural, pericardial, mediastinum; abdominopelvic: abdominal, pelvic). Mark the diaphragm.", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/03-body-cavities-practice.jpeg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/03-body-cavities-key.jpeg"},
+    {"id": "preset_04_regional_terms_anterior_view", "module": "Introduction & Body Organization", "title": "Regional terms, anterior view", "dok": 1, "notes": "Label anterior body regions: cephalic, cervical, thoracic, brachial, antecubital, antebrachial, carpal, digital, abdominal, pelvic, pubic, femoral, patellar, crural, fibular, and plantar.", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/04-regional-terms-anterior-practice.jpeg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/04-regional-terms-anterior-key.jpeg"},
+    {"id": "preset_05_regional_terms_posterior_view", "module": "Introduction & Body Organization", "title": "Regional terms, posterior view", "dok": 1, "notes": "Label posterior body regions: cephalic, occipital, cervical, scapular, vertebral, lumbar, sacral, gluteal, femoral, popliteal, sural, calcaneal, and plantar.", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/05-regional-terms-posterior-practice.jpeg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/05-regional-terms-posterior-key.jpeg"},
+    {"id": "preset_06_directional_terms_body_planes", "module": "Introduction & Body Organization", "title": "Directional terms & body planes", "dok": 2, "notes": "Label the planes (sagittal, midsagittal/median, frontal/coronal, transverse) and directional terms (superior, inferior, anterior/ventral, posterior/dorsal, medial, lateral, proximal, distal).", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/06-directional-terms-and-planes-practice.jpeg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/06-directional-terms-and-planes-key.jpeg"},
+    {"id": "preset_07_abdominopelvic_quadrants", "module": "Introduction & Body Organization", "title": "Abdominopelvic quadrants", "dok": 2, "notes": "Label the four quadrants (RUQ, LUQ, RLQ, LLQ) and name the major organs found in each.", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/07-abdominopelvic-quadrants-practice.jpeg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/07-abdominopelvic-quadrants-key.jpeg"},
+    {"id": "preset_08_animal_cell_structure", "module": "Introduction & Histology", "title": "Animal cell structure", "dok": 1, "notes": "Label the organelles: plasma membrane, cytoplasm, cytosol, nucleus, nucleolus, nuclear envelope, rough and smooth ER, ribosomes, Golgi apparatus, vesicles, lysosome, peroxisome, mitochondria, and centrosome.", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/08-animal-cell-structure-practice.jpeg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/08-animal-cell-structure-key.jpeg"},
+    {"id": "preset_09_skin_model_1", "module": "Integumentary System", "title": "Skin Model #1", "dok": 1, "notes": "Regions of the skin & Thick and Thin Skin", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/09-skin-model-1-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/09-skin-model-1-key.jpg"},
+    {"id": "preset_10_glands_of_the_skin", "module": "Integumentary System", "title": "Glands of the Skin", "dok": 1, "notes": "What are the Glands of the Skin", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/10-glands-of-the-skin-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/10-glands-of-the-skin-key.jpg"},
+    {"id": "preset_11_hair_follicle_and_associated_structures_", "module": "Integumentary System", "title": "Hair Follicle and Associated Structures of the Skin", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/11-hair-follicle-and-associated-structures-of-the-skin-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/11-hair-follicle-and-associated-structures-of-the-skin-key.jpg"},
+    {"id": "preset_12_skin_model_2", "module": "Integumentary System", "title": "Skin Model #2", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/12-skin-model-2-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/12-skin-model-2-key.jpg"},
+    {"id": "preset_13_skin_model_3_layers_of_the_epidermis", "module": "Integumentary System", "title": "Skin Model #3: Layers of the Epidermis", "dok": 1, "notes": "What are the Layers of the Epidermis?", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/13-skin-model-3-layers-of-the-epidermis-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/13-skin-model-3-layers-of-the-epidermis-key.jpg"},
+    {"id": "preset_14_histology_layers_of_the_epidermis_thin_s", "module": "Integumentary System", "title": "Histology Layers of the Epidermis-Thin Skin", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/14-histology-layers-of-the-epidermis-thin-skin-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/14-histology-layers-of-the-epidermis-thin-skin-key.jpg"},
+    {"id": "preset_15_hisology_layers_of_the_epidermis_thick_s", "module": "Integumentary System", "title": "Hisology: Layers of the Epidermis (Thick Skin)", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/15-hisology-layers-of-the-epidermis-thick-skin-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/15-hisology-layers-of-the-epidermis-thick-skin-key.jpg"},
+    {"id": "preset_16_histology_structures_of_dermal_papilla", "module": "Integumentary System", "title": "Histology Structures of Dermal Papilla", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/16-histology-structures-of-dermal-papilla-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/16-histology-structures-of-dermal-papilla-key.jpg"},
+    {"id": "preset_17_epithelial_cells", "module": "Introduction & Histology", "title": "Epithelial Cells", "dok": 1, "notes": "Name the Borders, Junctions and Structures of Epithelial Cells", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/17-epithelial-cells-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/17-epithelial-cells-key.png"},
+    {"id": "preset_18_histology_1", "module": "Introduction & Histology", "title": "Histology  #1", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/18-histology-1-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/18-histology-1-key.png"},
+    {"id": "preset_19_histology_2", "module": "Introduction & Histology", "title": "Histology #2", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/19-histology-2-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/19-histology-2-key.png"},
+    {"id": "preset_20_histology_3", "module": "Introduction & Histology", "title": "Histology #3", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/20-histology-3-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/20-histology-3-key.png"},
+    {"id": "preset_21_histology_4", "module": "Introduction & Histology", "title": "Histology #4", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/21-histology-4-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/21-histology-4-key.png"},
+    {"id": "preset_22_histology_5", "module": "Introduction & Histology", "title": "Histology #5", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/22-histology-5-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/22-histology-5-key.png"},
+    {"id": "preset_23_histology_6", "module": "Introduction & Histology", "title": "Histology #6", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/23-histology-6-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/23-histology-6-key.png"},
+    {"id": "preset_24_histology_7", "module": "Introduction & Histology", "title": "Histology #7", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/24-histology-7-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/24-histology-7-key.png"},
+    {"id": "preset_25_histology_8", "module": "Introduction & Histology", "title": "Histology #8", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/25-histology-8-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/25-histology-8-key.png"},
+    {"id": "preset_26_histology_9", "module": "Introduction & Histology", "title": "Histology #9", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/26-histology-9-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/26-histology-9-key.png"},
+    {"id": "preset_27_histology_10", "module": "Introduction & Histology", "title": "Histology #10", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/27-histology-10-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/27-histology-10-key.png"},
+    {"id": "preset_28_histology_11", "module": "Introduction & Histology", "title": "Histology #11", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/28-histology-11-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/28-histology-11-key.png"},
+    {"id": "preset_29_histology_12", "module": "Introduction & Histology", "title": "Histology #12", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/29-histology-12-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/29-histology-12-key.png"},
+    {"id": "preset_30_histology_13", "module": "Introduction & Histology", "title": "Histology #13", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/30-histology-13-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/30-histology-13-key.png"},
+    {"id": "preset_31_histology_14", "module": "Introduction & Histology", "title": "Histology #14", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/31-histology-14-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/31-histology-14-key.png"},
+    {"id": "preset_32_histology_15", "module": "Introduction & Histology", "title": "Histology #15", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/32-histology-15-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/32-histology-15-key.png"},
+    {"id": "preset_33_histology_16", "module": "Introduction & Histology", "title": "Histology #16", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/33-histology-16-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/33-histology-16-key.png"},
+    {"id": "preset_34_histology_17", "module": "Introduction & Histology", "title": "Histology #17", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/34-histology-17-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/34-histology-17-key.png"},
+    {"id": "preset_35_histology_18", "module": "Introduction & Histology", "title": "Histology #18", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/35-histology-18-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/35-histology-18-key.png"},
+    {"id": "preset_36_histology_19", "module": "Introduction & Histology", "title": "Histology #19", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/36-histology-19-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/36-histology-19-key.png"},
+    {"id": "preset_37_histology_20", "module": "Introduction & Histology", "title": "Histology #20", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/37-histology-20-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/37-histology-20-key.png"},
+    {"id": "preset_38_histology_21", "module": "Introduction & Histology", "title": "Histology #21", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/38-histology-21-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/38-histology-21-key.png"},
+    {"id": "preset_39_histology_22", "module": "Introduction & Histology", "title": "Histology #22", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/39-histology-22-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/39-histology-22-key.png"},
+    {"id": "preset_40_histology_23", "module": "Introduction & Histology", "title": "Histology #23", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/40-histology-23-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/40-histology-23-key.png"},
+    {"id": "preset_41_histology_24", "module": "Introduction & Histology", "title": "Histology #24", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/41-histology-24-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/41-histology-24-key.png"},
+    {"id": "preset_42_histology_26", "module": "Introduction & Histology", "title": "Histology #26", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/42-histology-26-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/42-histology-26-key.png"},
+    {"id": "preset_43_histology_27", "module": "Introduction & Histology", "title": "Histology #27", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/43-histology-27-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/43-histology-27-key.png"}
   ];
 
   var starterBody   = document.getElementById('starterBody');
@@ -2116,6 +2153,13 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   var starterStatus = document.getElementById('starterStatus');
   var addAllBtn     = document.getElementById('addAllStarterBtn');
   var jumpStarter   = document.getElementById('jumpStarter');
+  var exportCatsBtn = document.getElementById('exportCatsBtn');
+  var importCatsBtn = document.getElementById('importCatsBtn');
+  var importCatsFile= document.getElementById('importCatsFile');
+  var resetCatsBtn  = document.getElementById('resetCatsBtn');
+  var addPageBtn    = document.getElementById('addPageBtn');
+  var addPageDialog = document.getElementById('addPageDialog');
+  var addPageForm   = document.getElementById('addPageForm');
 
   if (!starterBody) return;
 
@@ -2135,17 +2179,114 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     return window.atlasBank && typeof window.atlasBank.addToBook === 'function';
   }
 
-  function render() {
-    starterCount.textContent = '(' + PRESETS.length + ')';
+  // ---- Category system ----------------------------------------------------
+  // Default categories follow the A&P module order; "Cadaver" is built in.
+  // Instructor re-filings live in localStorage (per device) and can be exported
+  // to a JSON file so they can be baked into the deployed page for all students.
+  // effCat() = saved override for this page, else its built-in module.
+  var DEFAULT_CATEGORIES = [
+    'Introduction & Body Organization', 'Introduction & Histology',
+    'Integumentary System', 'Skeletal System', 'Muscular System',
+    'Nervous System', 'Special Senses', 'Endocrine System',
+    'Cardiovascular System', 'Lymphatic & Immune', 'Respiratory System',
+    'Digestive System', 'Urinary System', 'Reproductive System', 'Cadaver'
+  ];
+  var LS_OVERRIDES  = 'acb-starter-cat-overrides';
+  var LS_CUSTOMCATS = 'acb-starter-custom-cats';
+  function lsGet(k, f) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (e) { return f; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  var overrides  = lsGet(LS_OVERRIDES, {});   // { presetId: category }
+  var customCats = lsGet(LS_CUSTOMCATS, []);  // [ "Custom name", ... ]
 
-    // Group by module, preserving PRESETS order within each group.
-    var order = [];
-    var groups = {};
-    PRESETS.forEach(function (p) {
-      var m = p.module || 'Unsorted';
-      if (!groups[m]) { groups[m] = []; order.push(m); }
-      groups[m].push(p);
+  // Instructor-added pages (self-service "Add a page"), saved per device.
+  var LS_CUSTOM_PRESETS = 'acb-starter-custom-presets';
+  var customPresets = lsGet(LS_CUSTOM_PRESETS, []);
+  // Base URL = the folder the built-in images live in, derived from the first preset,
+  // so a bare file name typed in the form resolves to the right place automatically.
+  var BASE_URL = (function () {
+    var u = (PRESETS[0] && PRESETS[0].practiceURL) || '';
+    var i = u.lastIndexOf('/');
+    return i >= 0 ? u.slice(0, i + 1) : '';
+  })();
+  function resolveURL(v) {
+    v = (v || '').trim();
+    if (!v) return '';
+    if (/^https?:\/\//i.test(v) || v.indexOf('data:') === 0) return v;
+    return BASE_URL + v.replace(/^\/+/, '');
+  }
+  function allPresets() { return PRESETS.concat(customPresets); }
+
+  function effCat(p) { return overrides[p.id] || p.module || 'Unsorted'; }
+
+  function categoryList() {
+    var seen = {}, list = [];
+    function add(c) { if (c && c !== 'Unsorted' && !seen[c]) { seen[c] = true; list.push(c); } }
+    DEFAULT_CATEGORIES.forEach(add);
+    customCats.forEach(add);
+    allPresets().forEach(function (p) { add(p.module); });
+    Object.keys(overrides).forEach(function (id) { add(overrides[id]); });
+    list.push('Unsorted');
+    return list;
+  }
+
+  function cloneWithCat(p) {
+    var c = {}; for (var k in p) { if (p.hasOwnProperty(k)) c[k] = p[k]; }
+    c.module = effCat(p);
+    return c;
+  }
+
+  function setCategory(preset, newCat) {
+    if (!newCat || newCat === (preset.module || 'Unsorted')) { delete overrides[preset.id]; }
+    else { overrides[preset.id] = newCat; }
+    lsSet(LS_OVERRIDES, overrides);
+    render();
+  }
+
+  function addCustomCategory() {
+    var name = (window.prompt('Name the new category (for example: Cadaver, Bone Markings, Brain Models):') || '').trim();
+    if (!name) return null;
+    if (DEFAULT_CATEGORIES.indexOf(name) === -1 && customCats.indexOf(name) === -1) {
+      customCats.push(name); lsSet(LS_CUSTOMCATS, customCats);
+    }
+    return name;
+  }
+
+  function buildCategorySelect(preset) {
+    var sel = document.createElement('select');
+    sel.setAttribute('aria-label', 'Category for ' + preset.title);
+    var cur = effCat(preset);
+    var cats = categoryList();
+    if (cats.indexOf(cur) === -1) cats.unshift(cur);
+    cats.forEach(function (c) {
+      var o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      if (c === cur) o.selected = true;
+      sel.appendChild(o);
     });
+    var addOpt = document.createElement('option');
+    addOpt.value = '__add__'; addOpt.textContent = '+ New category…';
+    sel.appendChild(addOpt);
+    sel.addEventListener('change', function () {
+      if (sel.value === '__add__') {
+        var name = addCustomCategory();
+        if (name) { overrides[preset.id] = name; lsSet(LS_OVERRIDES, overrides); }
+        render();
+        return;
+      }
+      setCategory(preset, sel.value);
+    });
+    return sel;
+  }
+
+  function render() {
+    var all = allPresets();
+    starterCount.textContent = '(' + all.length + ')';
+
+    // Group by effective (possibly re-filed) category; order by the category list.
+    var groups = {};
+    all.forEach(function (p) { var c = effCat(p); (groups[c] = groups[c] || []).push(p); });
+    var order = categoryList().filter(function (c) { return groups[c]; });
+    Object.keys(groups).forEach(function (c) { if (order.indexOf(c) === -1) order.push(c); });
 
     starterBody.innerHTML = '';
     order.forEach(function (m) {
@@ -2185,12 +2326,22 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
 
         var meta = document.createElement('div');
         meta.className = 'bank-entry-meta';
+        var isCustom = preset.id && preset.id.indexOf('custom_') === 0;
         var titleRow = '<div class="bank-entry-title-row"><span class="bank-entry-title">' + escapeHTML(preset.title) + '</span>';
         if (preset.dok) titleRow += '<span class="dok-chip dok-' + preset.dok + '">DOK ' + preset.dok + '</span>';
+        if (isCustom) titleRow += '<span class="bank-entry-tag">Added</span>';
         titleRow += '</div>';
         var notesHtml  = preset.notes  ? '<p class="bank-entry-notes">'  + escapeHTML(preset.notes)  + '</p>' : '';
         var sourceHtml = preset.source ? '<p class="bank-entry-source">' + escapeHTML(preset.source) + '</p>' : '';
         meta.innerHTML = titleRow + notesHtml + sourceHtml;
+
+        var catRow = document.createElement('div');
+        catRow.className = 'bank-entry-cat';
+        var catLab = document.createElement('span'); catLab.textContent = 'Category';
+        catRow.appendChild(catLab);
+        catRow.appendChild(buildCategorySelect(preset));
+        meta.appendChild(catRow);
+
         card.appendChild(meta);
 
         var actions = document.createElement('div');
@@ -2200,7 +2351,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
         loadBtn.type = 'button'; loadBtn.className = 'primary'; loadBtn.textContent = 'Load to canvas';
         loadBtn.addEventListener('click', function () {
           if (window.atlasBank && typeof window.atlasBank.loadEntry === 'function') {
-            window.atlasBank.loadEntry(preset);
+            window.atlasBank.loadEntry(cloneWithCat(preset));
           }
         });
 
@@ -2209,7 +2360,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
         addBtn.setAttribute('aria-label', 'Add ' + preset.title + ' to my book');
         addBtn.addEventListener('click', function () {
           if (!bankReady()) { announce('Your book is not ready yet. Try again in a moment.'); return; }
-          window.atlasBank.addToBook(preset).then(function () {
+          window.atlasBank.addToBook(cloneWithCat(preset)).then(function () {
             addBtn.classList.add('is-added');
             addBtn.textContent = 'In my book';
             announce('Added "' + preset.title + '" to your coloring book.');
@@ -2218,6 +2369,20 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
 
         actions.appendChild(loadBtn);
         actions.appendChild(addBtn);
+        if (isCustom) {
+          var rmBtn = document.createElement('button');
+          rmBtn.type = 'button'; rmBtn.className = 'danger'; rmBtn.textContent = 'Remove';
+          rmBtn.setAttribute('aria-label', 'Remove ' + preset.title + ' from the starter library');
+          rmBtn.addEventListener('click', function () {
+            if (!window.confirm('Remove "' + preset.title + '" from the starter library?')) return;
+            customPresets = customPresets.filter(function (x) { return x.id !== preset.id; });
+            lsSet(LS_CUSTOM_PRESETS, customPresets);
+            delete overrides[preset.id]; lsSet(LS_OVERRIDES, overrides);
+            render();
+            announce('Removed "' + preset.title + '".');
+          });
+          actions.appendChild(rmBtn);
+        }
         card.appendChild(actions);
 
         entriesEl.appendChild(card);
@@ -2231,12 +2396,121 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   if (addAllBtn) {
     addAllBtn.addEventListener('click', function () {
       if (!bankReady()) { announce('Your book is not ready yet. Try again in a moment.'); return; }
-      Promise.all(PRESETS.map(function (p) { return window.atlasBank.addToBook(p); })).then(function () {
-        announce('Added all ' + PRESETS.length + ' starter pages to your coloring book.');
+      var all = allPresets();
+      Promise.all(all.map(function (p) { return window.atlasBank.addToBook(cloneWithCat(p)); })).then(function () {
+        announce('Added all ' + all.length + ' starter pages to your coloring book.');
         starterBody.querySelectorAll('.bank-entry-actions .add-book').forEach(function (b) {
           b.classList.add('is-added'); b.textContent = 'In my book';
         });
       });
+    });
+  }
+
+  // ---- Export / import / reset the category sorting ----
+  if (exportCatsBtn) {
+    exportCatsBtn.addEventListener('click', function () {
+      var payload = {
+        format: 'atlas-starter-categories', version: 1,
+        exportedAt: new Date().toISOString(),
+        overrides: overrides, customCategories: customCats, customPresets: customPresets
+      };
+      var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'atlas-starter-categories.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 500);
+      announce('Exported your category sorting. Send this file back to bake it into the page for all students.');
+    });
+  }
+  if (importCatsBtn && importCatsFile) {
+    importCatsBtn.addEventListener('click', function () { importCatsFile.click(); });
+    importCatsFile.addEventListener('change', function (e) {
+      var file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var data;
+        try { data = JSON.parse(ev.target.result); } catch (err) { announce('That file is not valid JSON.'); return; }
+        if (!data || data.format !== 'atlas-starter-categories') { announce('That is not an Atlas category file.'); return; }
+        if (data.overrides && typeof data.overrides === 'object') {
+          Object.keys(data.overrides).forEach(function (id) { overrides[id] = String(data.overrides[id]); });
+          lsSet(LS_OVERRIDES, overrides);
+        }
+        if (Array.isArray(data.customCategories)) {
+          data.customCategories.forEach(function (c) { if (c && customCats.indexOf(c) === -1) customCats.push(c); });
+          lsSet(LS_CUSTOMCATS, customCats);
+        }
+        if (Array.isArray(data.customPresets)) {
+          data.customPresets.forEach(function (p) {
+            if (p && p.id && p.title && p.practiceURL && !customPresets.some(function (x) { return x.id === p.id; })) {
+              customPresets.push(p);
+            }
+          });
+          lsSet(LS_CUSTOM_PRESETS, customPresets);
+        }
+        render();
+        announce('Imported category sorting and added pages.');
+      };
+      reader.readAsText(file);
+    });
+  }
+  if (resetCatsBtn) {
+    resetCatsBtn.addEventListener('click', function () {
+      if (!window.confirm('Reset every starter page back to its built-in category? Your custom categories and re-filings on this device will be cleared.')) return;
+      overrides = {}; customCats = [];
+      lsSet(LS_OVERRIDES, overrides); lsSet(LS_CUSTOMCATS, customCats);
+      render();
+      announce('Categories reset to defaults.');
+    });
+  }
+
+  // ---- Add a page (instructor self-service) ----
+  function openAddPage() {
+    if (!addPageDialog) return;
+    if (addPageForm) addPageForm.reset();
+    var dokSel = document.getElementById('apDok'); if (dokSel) dokSel.value = '1';
+    var hint = document.getElementById('apBaseHint');
+    if (hint) hint.textContent = BASE_URL ? ('File names resolve under: ' + BASE_URL) : 'Enter full https links to your images.';
+    if (typeof addPageDialog.showModal === 'function') { try { addPageDialog.showModal(); } catch (e) { addPageDialog.setAttribute('open', ''); } }
+    else { addPageDialog.setAttribute('open', ''); }
+    var t = document.getElementById('apTitle'); if (t) setTimeout(function () { t.focus(); }, 30);
+  }
+  function closeAddPage() {
+    if (!addPageDialog) return;
+    if (typeof addPageDialog.close === 'function') { try { addPageDialog.close(); } catch (e) {} }
+    addPageDialog.removeAttribute('open');
+  }
+  if (addPageBtn) addPageBtn.addEventListener('click', openAddPage);
+  if (addPageForm) {
+    addPageForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var title    = (document.getElementById('apTitle').value || '').trim();
+      var practice = (document.getElementById('apPractice').value || '').trim();
+      if (!title || !practice) return;
+      var keyRaw = (document.getElementById('apKey').value || '').trim();
+      var module = (document.getElementById('apModule').value || '').trim() || 'Unsorted';
+      var notes  = (document.getElementById('apNotes').value || '').trim();
+      var dokVal = document.getElementById('apDok').value;
+      var pURL = resolveURL(practice);
+      var entry = {
+        id: 'custom_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        module: module, title: title,
+        dok: dokVal ? parseInt(dokVal, 10) : null,
+        notes: notes, source: 'Added by instructor',
+        practiceURL: pURL, keyURL: keyRaw ? resolveURL(keyRaw) : pURL
+      };
+      // Remember a brand-new category so it shows in every dropdown.
+      if (module !== 'Unsorted' && DEFAULT_CATEGORIES.indexOf(module) === -1 && customCats.indexOf(module) === -1) {
+        customCats.push(module); lsSet(LS_CUSTOMCATS, customCats);
+      }
+      customPresets.push(entry);
+      lsSet(LS_CUSTOM_PRESETS, customPresets);
+      closeAddPage();
+      render();
+      announce('Added "' + title + '" to ' + module + '. Click Export sorting to make it permanent for students.');
+      var s = document.getElementById('starter'); if (s && s.scrollIntoView) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
 

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas Builder &middot; BIO 004 Coloring Book</title>
+<style>
+@import url('https://cdn.jsdelivr.net/npm/@fontsource-variable/plus-jakarta-sans/index.css');
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-size: 16px; line-height: 1.55; }
+body { font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif; background: #FAFAF9; color: #0B1530; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #8B3A2E; outline-offset: 2px; border-radius: 4px; }
+
+.skip-link { position: absolute; top: -100px; left: 8px; background: #0B1530; color: #FAFAF9; padding: 12px 20px; text-decoration: none; font-size: 13px; font-weight: 700; border-radius: 4px; z-index: 9999; }
+.skip-link:focus { top: 8px; }
+
+.site-header, .hero, .workspace, .footer-section { padding-left: max(24px, 3vw); padding-right: max(24px, 3vw); }
+.site-header { background: #FFFFFF; padding-top: 18px; padding-bottom: 14px; }
+.site-logo { display: inline-flex; align-items: center; gap: 14px; text-decoration: none; }
+.site-logo svg { height: 46px; width: auto; display: block; }
+.logo-title { font-size: 21px; font-weight: 800; color: #0B1530; line-height: 1; }
+.logo-title .accent { color: #8B3A2E; }
+.logo-sub { font-size: 10px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase; opacity: 0.72; display: block; margin-top: 3px; }
+
+.hero { background: #FFFFFF; padding-top: 18px; padding-bottom: 24px; }
+.hero-eyebrow { font-size: 10.5px; font-weight: 700; color: #8B3A2E; letter-spacing: 0.26em; text-transform: uppercase; margin: 0 0 10px; }
+.hero-headline { font-size: clamp(26px, 3.2vw, 38px); font-weight: 800; color: #0B1530; line-height: 1.06; margin: 0 0 10px; }
+.hero-headline .accent { color: #8B3A2E; }
+.hero-subhead { font-size: 14.5px; color: #0B1530; line-height: 1.6; opacity: 0.86; margin: 0; max-width: 760px; }
+
+.workspace { padding-top: 24px; padding-bottom: 40px; max-width: 1180px; margin: 0 auto; }
+
+.panel { background: #FFFFFF; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 10px; box-shadow: 0 1px 3px rgba(11, 21, 48, 0.06); padding: 22px; margin-bottom: 22px; }
+.panel h2 { font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #8B3A2E; margin: 0 0 4px; }
+.panel .panel-sub { font-size: 13px; color: #0B1530; opacity: 0.78; margin: 0 0 18px; line-height: 1.5; }
+
+.drop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.drop-zone { border: 2px dashed rgba(11, 21, 48, 0.25); border-radius: 8px; padding: 18px; text-align: center; background: #FAFAF9; cursor: pointer; transition: border-color 200ms ease, background 200ms ease; position: relative; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.drop-zone:hover, .drop-zone.is-hover { border-color: #8B3A2E; background: #FFFFFF; }
+.drop-zone.is-filled { border-style: solid; border-color: #0B1530; background: #FFFFFF; }
+.drop-zone-eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #8B3A2E; }
+.drop-zone-title { font-size: 14px; font-weight: 800; color: #0B1530; }
+.drop-zone-hint { font-size: 12px; color: #0B1530; opacity: 0.7; line-height: 1.4; }
+.drop-zone-thumb { max-width: 200px; max-height: 96px; object-fit: contain; border-radius: 4px; background: #060A18; padding: 4px; }
+.drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.drop-zone-clear { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.04); border: none; color: #0B1530; cursor: pointer; padding: 3px 8px; font-size: 11px; font-weight: 700; border-radius: 3px; }
+.drop-zone-clear:hover { color: #8B3A2E; }
+
+.field { display: grid; gap: 5px; margin-bottom: 14px; }
+.field label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #0B1530; opacity: 0.8; }
+.field .hint { font-size: 11.5px; font-weight: 400; letter-spacing: 0; text-transform: none; opacity: 0.7; }
+.field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border: 1px solid rgba(11, 21, 48, 0.22); border-radius: 5px; font-family: inherit; font-size: 14px; color: #0B1530; background: #FFFFFF; }
+.field textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.btn { padding: 11px 20px; border-radius: 5px; font-family: inherit; font-size: 11.5px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; cursor: pointer; border: 1px solid rgba(11, 21, 48, 0.22); background: #FFFFFF; color: #0B1530; }
+.btn:hover { border-color: #8B3A2E; color: #8B3A2E; }
+.btn.primary { background: #8B3A2E; color: #FFFFFF; border-color: #8B3A2E; }
+.btn.primary:hover { background: #A0452F; color: #FFFFFF; }
+.btn.gold { background: #C9A14A; color: #0B1530; border-color: #C9A14A; }
+.btn.gold:hover { background: #B8924A; border-color: #B8924A; color: #0B1530; }
+.form-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.form-status { font-size: 12px; font-weight: 700; color: #2A6F7A; letter-spacing: 0.04em; }
+
+.lib-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.lib-title-wrap h2 { margin-bottom: 2px; }
+.lib-count { font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: #8B3A2E; }
+.lib-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.entry { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; padding: 14px; border: 1px solid rgba(11, 21, 48, 0.14); border-radius: 8px; margin-bottom: 10px; background: #FFFFFF; }
+.entry-thumbs { display: grid; grid-template-columns: 70px 70px; gap: 6px; }
+.entry-thumb { position: relative; width: 70px; height: 54px; background: #060A18; border-radius: 4px; overflow: hidden; }
+.entry-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.entry-thumb span { position: absolute; left: 3px; top: 3px; font-size: 7.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(11,21,48,0.78); color: #FAFAF9; padding: 1px 4px; border-radius: 2px; }
+.entry-meta { min-width: 0; }
+.entry-title { font-size: 14.5px; font-weight: 800; color: #0B1530; line-height: 1.25; }
+.entry-module { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8B3A2E; margin-top: 2px; }
+.entry-notes { font-size: 12.5px; color: #0B1530; opacity: 0.78; margin: 6px 0 0; line-height: 1.45; }
+.dok-chip { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: #EDF1F3; border: 1px solid rgba(11,21,48,0.18); color: #0B1530; vertical-align: middle; }
+.entry-controls { display: flex; flex-direction: column; gap: 6px; }
+.icon-btn { width: 34px; height: 30px; border: 1px solid rgba(11, 21, 48, 0.20); border-radius: 4px; background: #FFFFFF; color: #0B1530; cursor: pointer; font-size: 13px; font-weight: 800; }
+.icon-btn:hover { border-color: #8B3A2E; color: #8B3A2E; }
+.icon-btn.danger:hover { border-color: #C0392B; color: #C0392B; }
+.lib-empty { text-align: center; padding: 28px 16px; color: #0B1530; opacity: 0.65; font-size: 13px; }
+
+.footer-section { background: #060A18; padding-top: 22px; padding-bottom: 18px; text-align: center; }
+.footer-section p { margin: 0; }
+.footer-byline { font-size: 10.5px; font-weight: 700; color: #C9A14A; letter-spacing: 0.18em; text-transform: uppercase; }
+.footer-meta { font-size: 11.5px; color: #FAFAF9; opacity: 0.78; margin-top: 6px; }
+
+@media (max-width: 680px) {
+  .drop-grid, .field-row { grid-template-columns: 1fr; }
+  .entry { grid-template-columns: 1fr; }
+  .entry-controls { flex-direction: row; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site-header">
+  <a href="index.html" class="site-logo" target="_top" aria-label="BIO 004 course home">
+    <svg viewBox="40 10 125 148" role="img" aria-hidden="true" focusable="false">
+      <g transform="translate(0, 18)">
+        <g transform="translate(60, 0) rotate(8 0 130)"><circle cx="0" cy="20" r="10" fill="#0B1530"/><path d="M 0,32 C -10,32 -16,36 -16,42 C -16,55 -13,68 -11,82 C -10,100 -12,118 -14,130 L 14,130 C 12,118 10,100 11,82 C 13,68 16,55 16,42 C 16,36 10,32 0,32 Z" fill="#0B1530"/></g>
+        <g transform="translate(100, 0)"><circle cx="0" cy="10" r="11" fill="#8B3A2E"/><path d="M 0,22 C -11,22 -17,26 -17,34 C -17,52 -14,70 -12,86 C -11,108 -13,122 -15,132 L 15,132 C 13,122 11,108 12,86 C 14,70 17,52 17,34 C 17,26 11,22 0,22 Z" fill="#8B3A2E"/></g>
+        <g transform="translate(140, 0) rotate(-8 0 130)"><circle cx="0" cy="20" r="10" fill="#C9A14A"/><path d="M 0,32 C -10,32 -16,36 -16,42 C -16,55 -13,68 -11,82 C -10,100 -12,118 -14,130 L 14,130 C 12,118 10,100 11,82 C 13,68 16,55 16,42 C 16,36 10,32 0,32 Z" fill="#C9A14A"/></g>
+      </g>
+    </svg>
+    <span><span class="logo-title">Human <span class="accent">Anatomy</span></span><span class="logo-sub">BIO 004 &middot; Solano Community College</span></span>
+  </a>
+</header>
+
+<section class="hero">
+  <p class="hero-eyebrow">BIO 004 &middot; Atlas Coloring Book &middot; Author tool</p>
+  <h1 class="hero-headline">Atlas <span class="accent">Builder</span>.</h1>
+  <p class="hero-subhead">Build the built-in starter library for the coloring book. Add a practice image and its answer key, give it a title and a study prompt, and it joins the list below. When the list is ready, click Export and send me the file. I will bake it into the tool with all the canvas fixes applied. Your work autosaves in this browser, but Export is the real save.</p>
+</section>
+
+<main class="workspace" id="main">
+
+  <section class="panel" aria-labelledby="add-title">
+    <h2 id="add-title">Add a page</h2>
+    <p class="panel-sub">Practice image is required. If a page has no separate key (like the anatomical position reference), leave the key empty and the practice image is used for both.</p>
+
+    <div class="drop-grid">
+      <label class="drop-zone" id="dropPractice">
+        <span class="drop-zone-eyebrow">Practice image</span>
+        <span class="drop-zone-title" data-title>Drop unlabeled image</span>
+        <span class="drop-zone-hint" data-hint>or click to browse &middot; PNG, JPG</span>
+        <input type="file" accept="image/*" id="filePractice" aria-label="Practice image file">
+      </label>
+      <label class="drop-zone" id="dropKey">
+        <span class="drop-zone-eyebrow">Answer key (optional)</span>
+        <span class="drop-zone-title" data-title>Drop labeled key</span>
+        <span class="drop-zone-hint" data-hint>or click to browse &middot; leave empty to reuse practice</span>
+        <input type="file" accept="image/*" id="fileKey" aria-label="Answer key file">
+      </label>
+    </div>
+
+    <div class="field">
+      <label for="fTitle">Title <span class="hint">(required)</span></label>
+      <input type="text" id="fTitle" maxlength="120" autocomplete="off" placeholder="e.g., Cardiac muscle histology, longitudinal section">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="fModule">Module / category</label>
+        <input type="text" id="fModule" list="moduleSuggestions" maxlength="80" autocomplete="off" placeholder="Type a new one or pick a saved one">
+        <div style="display:flex; gap:10px; align-items:center; margin-top:6px;">
+          <button type="button" class="btn" id="addCatBtn" style="padding:7px 12px; font-size:10px;">Save as category</button>
+          <span class="hint" id="catStatus" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fDok">DOK level <span class="hint">(optional)</span></label>
+        <select id="fDok">
+          <option value="">No level set</option>
+          <option value="1">DOK 1 &middot; Recall</option>
+          <option value="2">DOK 2 &middot; Skill / concept</option>
+          <option value="3">DOK 3 &middot; Strategic thinking</option>
+          <option value="4">DOK 4 &middot; Extended thinking</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="fNotes">Notes / study prompt <span class="hint">(optional, shown above the canvas when loaded)</span></label>
+      <textarea id="fNotes" maxlength="500" placeholder="e.g., Label A-band, I-band, Z-line, sarcomere, M-line."></textarea>
+    </div>
+    <div class="field">
+      <label for="fSource">Source <span class="hint">(optional)</span></label>
+      <input type="text" id="fSource" maxlength="120" autocomplete="off" placeholder="BIO 004 Atlas slide bank">
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn primary" id="addBtn">Add to library</button>
+      <button type="button" class="btn" id="cancelEditBtn" hidden>Cancel edit</button>
+      <span class="form-status" id="formStatus" role="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="lib-title">
+    <div class="lib-header">
+      <div class="lib-title-wrap">
+        <h2 id="lib-title">Your library</h2>
+        <span class="lib-count" id="libCount">0 pages</span>
+      </div>
+      <div class="lib-actions">
+        <button type="button" class="btn gold" id="exportBtn">Export library</button>
+        <button type="button" class="btn" id="importBtn">Import library</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+    </div>
+    <div id="libBody" aria-live="polite">
+      <div class="lib-empty" id="libEmpty">No pages yet. Add one above to start.</div>
+    </div>
+  </section>
+
+</main>
+
+<datalist id="moduleSuggestions">
+  <option value="Introduction &amp; Body Organization"></option>
+  <option value="Introduction &amp; Histology"></option>
+  <option value="Integumentary System"></option>
+  <option value="Skeletal System"></option>
+  <option value="Axial Skeleton"></option>
+  <option value="Appendicular Skeleton"></option>
+  <option value="Muscular System"></option>
+  <option value="Nervous System"></option>
+  <option value="Special Senses"></option>
+  <option value="Endocrine System"></option>
+  <option value="Cardiovascular System"></option>
+  <option value="Lymphatic &amp; Immune"></option>
+  <option value="Respiratory System"></option>
+  <option value="Digestive System"></option>
+  <option value="Urinary System"></option>
+  <option value="Reproductive System"></option>
+</datalist>
+
+<footer class="footer-section">
+  <p class="footer-byline">Dr. Sharilyn Rennie</p>
+  <p class="footer-meta">BIO 004 &middot; Atlas Coloring Book &middot; Author tool</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'atlas-builder-library-v1';
+  var REPO_BASE = 'https://drsrennie-stack.github.io/new-build-bio4-solano/';
+
+  // Existing 8 starter pages, preloaded. Images referenced by their hosted URL.
+  var PRELOAD = [
+    { module: 'Introduction & Body Organization', title: 'Levels of structural organization', dok: 1, notes: 'Label the levels from simplest to most complex: chemical, cellular, tissue, organ, organ system, and organismal.', source: 'BIO 004 Atlas slide bank', practice: { kind: 'url', url: REPO_BASE + '01-levels-of-organization-practice.jpeg' }, key: { kind: 'url', url: REPO_BASE + '01-levels-of-organization-key.jpeg' } },
+    { module: 'Introduction & Body Organization', title: 'Anatomical position (anterior & lateral)', dok: 1, notes: 'Annotate the defining features: body erect, head and toes forward, feet flat and slightly apart, arms at the sides with palms facing forward. This reference slide has no separate key.', source: 'BIO 004 Atlas slide bank', practice: { kind: 'url', url: REPO_BASE + '02-anatomical-position.jpeg' }, key: { kind: 'url', url: REPO_BASE + '02-anatomical-position.jpeg' } },
+    { module: 'Introduction & Body Organization', title: 'Body cavities (lateral & anterior)', dok: 2, notes: 'Label the dorsal cavity (cranial, vertebral) and ventral cavity (thoracic: pleural, pericardial, mediastinum; abdominopelvic: abdominal, pelvic). Mark the diaphragm.', source: 'BIO 004 Atlas slide bank', practice: { kind: 'url', url: REPO_BASE + '03-body-cavities-practice.jpeg' }, key: { kind: 'url', url: REPO_BASE + '03-body-cavities-key.jpeg' } },
+    { module: 'Introduction & Body Organization', title: 'Regional terms, anterior view', dok: 1, notes: 'Label anterior body regions: cephalic, cervical, thoracic, brachial, antecubital, antebrachial, carpal, digital, abdominal, pelvic, pubic, femoral, patellar, crural, fibular, and plantar.', source: 'BIO 004 Atlas slide bank', practice: { kind: 'url', url: REPO_BASE + '04-regional-terms-anterior-practice.jpeg' }, key: { kind: 'url', url: REPO_BASE + '04-regional-terms-anterior-key.jpeg' } },
+    { module: 'Introduction & Body Organization', title: 'Regional terms, posterior view', dok: 1, notes: 'Label posterior body regions: cephalic, occipital, cervical, scapular, vertebral, lumbar, sacral, gluteal, femoral, popliteal, sural, calcaneal, and plantar.', source: 'BIO 004 Atlas slide bank', practice: { kind: 'url', url: REPO_BASE + '05-regional-terms-posterior-practice.jpeg' }, key: { kind: 'url', url: REPO_BASE + '05-regional-terms-posterior-key.jpeg' } },
+    { module: 'Introduction & Body Organization', title: 'Directional terms & body planes', dok: 2, notes: 'Label the planes (sagittal, midsagittal/median, frontal/coronal, transverse) and directional terms (superior, inferior, anterior/ventral, posterior/dorsal, medial, lateral, proximal, distal).', source: 'BIO 004 Atlas slide bank', practice: { kind: 'url', url: REPO_BASE + '06-directional-terms-and-planes-practice.jpeg' }, key: { kind: 'url', url: REPO_BASE + '06-directional-terms-and-planes-key.jpeg' } },
+    { module: 'Introduction & Body Organization', title: 'Abdominopelvic quadrants', dok: 2, notes: 'Label the four quadrants (RUQ, LUQ, RLQ, LLQ) and name the major organs found in each.', source: 'BIO 004 Atlas slide bank', practice: { kind: 'url', url: REPO_BASE + '07-abdominopelvic-quadrants-practice.jpeg' }, key: { kind: 'url', url: REPO_BASE + '07-abdominopelvic-quadrants-key.jpeg' } },
+    { module: 'Introduction & Histology', title: 'Animal cell structure', dok: 1, notes: 'Label the organelles: plasma membrane, cytoplasm, cytosol, nucleus, nucleolus, nuclear envelope, rough and smooth ER, ribosomes, Golgi apparatus, vesicles, lysosome, peroxisome, mitochondria, and centrosome.', source: 'BIO 004 Atlas slide bank', practice: { kind: 'url', url: REPO_BASE + '08-animal-cell-structure-practice.jpeg' }, key: { kind: 'url', url: REPO_BASE + '08-animal-cell-structure-key.jpeg' } }
+  ];
+
+  var library = [];
+  var editingId = null;
+  var pendingPractice = null;  // { kind:'data', dataUrl, filename } captured from the drop zone
+  var pendingKey = null;
+
+  // ---- DOM ----
+  var $ = function (id) { return document.getElementById(id); };
+  var libBody = $('libBody'), libEmpty = $('libEmpty'), libCount = $('libCount');
+  var fTitle = $('fTitle'), fModule = $('fModule'), fDok = $('fDok'), fNotes = $('fNotes'), fSource = $('fSource');
+  var formStatus = $('formStatus'), addBtn = $('addBtn'), cancelEditBtn = $('cancelEditBtn');
+
+  function uid() { return 'p_' + Date.now() + '_' + Math.floor(Math.random() * 1e6); }
+
+  function slug(s) {
+    return (s || 'page').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'page';
+  }
+  function extFromDataUrl(d) {
+    var m = /^data:image\/([a-z0-9.+-]+);/i.exec(d || '');
+    var t = m ? m[1].toLowerCase() : 'png';
+    if (t === 'jpeg') t = 'jpg';
+    return t;
+  }
+  function status(msg) {
+    formStatus.textContent = msg || '';
+    if (msg) setTimeout(function () { if (formStatus.textContent === msg) formStatus.textContent = ''; }, 4000);
+  }
+
+  // ---- Persistence (best effort; Export is the durable save) ----
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(library)); }
+    catch (e) { /* quota: large embedded images may not fit. Export still works. */ }
+  }
+  function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+    if (raw) {
+      try {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length) { library = parsed; return; }
+      } catch (e) {}
+    }
+    // first run: preload the existing 8
+    library = PRELOAD.map(function (p) { var c = JSON.parse(JSON.stringify(p)); c.id = uid(); return c; });
+  }
+
+  // ---- Drop zones ----
+  function setupDrop(zoneId, inputId, role) {
+    var zone = $(zoneId), input = $(inputId);
+    ['dragenter', 'dragover'].forEach(function (ev) {
+      zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('is-hover'); });
+    });
+    ['dragleave', 'drop'].forEach(function (ev) {
+      zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('is-hover'); });
+    });
+    zone.addEventListener('drop', function (e) {
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) readImage(f, role);
+    });
+    input.addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (f) readImage(f, role);
+      e.target.value = '';
+    });
+  }
+  function readImage(file, role) {
+    if (!file.type || file.type.indexOf('image/') !== 0) { status('Please choose an image file.'); return; }
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      var data = { kind: 'data', dataUrl: ev.target.result, origName: file.name };
+      if (role === 'practice') pendingPractice = data; else pendingKey = data;
+      decorate(role);
+    };
+    reader.readAsDataURL(file);
+  }
+  function decorate(role) {
+    var zoneId = role === 'practice' ? 'dropPractice' : 'dropKey';
+    var data = role === 'practice' ? pendingPractice : pendingKey;
+    var zone = $(zoneId);
+    var titleEl = zone.querySelector('[data-title]'), hintEl = zone.querySelector('[data-hint]');
+    var oldThumb = zone.querySelector('.drop-zone-thumb'); if (oldThumb) oldThumb.remove();
+    var oldClear = zone.querySelector('.drop-zone-clear'); if (oldClear) oldClear.remove();
+    if (data) {
+      zone.classList.add('is-filled');
+      var thumb = document.createElement('img');
+      thumb.className = 'drop-zone-thumb'; thumb.alt = ''; thumb.src = data.dataUrl || data.url;
+      zone.insertBefore(thumb, zone.firstChild);
+      if (titleEl) titleEl.textContent = role === 'practice' ? 'Practice image ready' : 'Answer key ready';
+      if (hintEl) hintEl.textContent = 'Click to replace';
+      var clr = document.createElement('button');
+      clr.type = 'button'; clr.className = 'drop-zone-clear'; clr.textContent = 'Remove';
+      clr.setAttribute('aria-label', 'Remove ' + role + ' image');
+      clr.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (role === 'practice') pendingPractice = null; else pendingKey = null;
+        decorate(role);
+      });
+      zone.appendChild(clr);
+    } else {
+      zone.classList.remove('is-filled');
+      if (role === 'practice') { titleEl.textContent = 'Drop unlabeled image'; hintEl.textContent = 'or click to browse · PNG, JPG'; }
+      else { titleEl.textContent = 'Drop labeled key'; hintEl.textContent = 'or click to browse · leave empty to reuse practice'; }
+    }
+  }
+
+  // ---- Add / edit ----
+  addBtn.addEventListener('click', function () {
+    var title = fTitle.value.trim();
+    if (!title) { status('A title is required.'); fTitle.focus(); return; }
+    if (!editingId && !pendingPractice) { status('Add a practice image first.'); return; }
+
+    var entry;
+    if (editingId) {
+      entry = library.filter(function (e) { return e.id === editingId; })[0];
+      if (!entry) { editingId = null; return; }
+    } else {
+      entry = { id: uid() };
+      library.push(entry);
+    }
+    entry.title = title;
+    entry.module = fModule.value.trim();
+    registerModule(entry.module);
+    entry.dok = fDok.value ? parseInt(fDok.value, 10) : null;
+    entry.notes = fNotes.value.trim();
+    entry.source = fSource.value.trim();
+
+    if (pendingPractice) entry.practice = { kind: 'data', dataUrl: pendingPractice.dataUrl };
+    if (pendingKey) entry.key = { kind: 'data', dataUrl: pendingKey.dataUrl };
+    // if no key supplied at all, reuse practice
+    if (!entry.key && entry.practice) entry.key = JSON.parse(JSON.stringify(entry.practice));
+    if (!entry.practice) { status('Add a practice image first.'); return; }
+
+    resetForm();
+    render(); save();
+    status(editingId ? 'Page updated.' : 'Page added.');
+    editingId = null;
+  });
+
+  cancelEditBtn.addEventListener('click', function () { resetForm(); editingId = null; status('Edit cancelled.'); });
+
+  function resetForm() {
+    fTitle.value = ''; fModule.value = ''; fDok.value = ''; fNotes.value = ''; fSource.value = '';
+    pendingPractice = null; pendingKey = null;
+    decorate('practice'); decorate('key');
+    addBtn.textContent = 'Add to library';
+    cancelEditBtn.hidden = true;
+  }
+
+  function startEdit(id) {
+    var e = library.filter(function (x) { return x.id === id; })[0];
+    if (!e) return;
+    editingId = id;
+    fTitle.value = e.title || ''; fModule.value = e.module || '';
+    fDok.value = e.dok ? String(e.dok) : ''; fNotes.value = e.notes || ''; fSource.value = e.source || '';
+    pendingPractice = e.practice ? { kind: 'data', dataUrl: e.practice.dataUrl, url: e.practice.url } : null;
+    pendingKey = e.key ? { kind: 'data', dataUrl: e.key.dataUrl, url: e.key.url } : null;
+    decorate('practice'); decorate('key');
+    addBtn.textContent = 'Save changes';
+    cancelEditBtn.hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    fTitle.focus();
+  }
+
+  function move(id, dir) {
+    var i = library.findIndex(function (e) { return e.id === id; });
+    var j = i + dir;
+    if (i < 0 || j < 0 || j >= library.length) return;
+    var tmp = library[i]; library[i] = library[j]; library[j] = tmp;
+    render(); save();
+  }
+  function remove(id) {
+    var e = library.filter(function (x) { return x.id === id; })[0];
+    if (!e) return;
+    if (!window.confirm('Remove "' + (e.title || 'this page') + '" from the library?')) return;
+    library = library.filter(function (x) { return x.id !== id; });
+    render(); save();
+  }
+
+  // ---- Render ----
+  function imgSrc(side) { return side ? (side.dataUrl || side.url || '') : ''; }
+
+  function render() {
+    libCount.textContent = library.length + (library.length === 1 ? ' page' : ' pages');
+    if (!library.length) {
+      libBody.innerHTML = '';
+      libBody.appendChild(libEmpty);
+      libEmpty.hidden = false;
+      return;
+    }
+    libBody.innerHTML = '';
+    library.forEach(function (e, idx) {
+      var row = document.createElement('div');
+      row.className = 'entry';
+
+      var thumbs = document.createElement('div');
+      thumbs.className = 'entry-thumbs';
+      thumbs.innerHTML =
+        '<div class="entry-thumb"><span>Practice</span><img alt="" src="' + imgSrc(e.practice) + '"></div>' +
+        '<div class="entry-thumb"><span>Key</span><img alt="" src="' + imgSrc(e.key) + '"></div>';
+
+      var meta = document.createElement('div');
+      meta.className = 'entry-meta';
+      var dokChip = e.dok ? '<span class="dok-chip">DOK ' + e.dok + '</span>' : '';
+      meta.innerHTML =
+        '<div class="entry-title">' + escapeHtml(e.title || 'Untitled') + dokChip + '</div>' +
+        '<div class="entry-module">' + escapeHtml(e.module || 'No module') + '</div>' +
+        (e.notes ? '<p class="entry-notes">' + escapeHtml(e.notes) + '</p>' : '');
+
+      var ctrls = document.createElement('div');
+      ctrls.className = 'entry-controls';
+      ctrls.appendChild(iconBtn('↑', 'Move up', function () { move(e.id, -1); }, idx === 0));
+      ctrls.appendChild(iconBtn('↓', 'Move down', function () { move(e.id, 1); }, idx === library.length - 1));
+      ctrls.appendChild(iconBtn('Edit', 'Edit ' + (e.title || 'page'), function () { startEdit(e.id); }, false, true));
+      ctrls.appendChild(iconBtn('✕', 'Remove ' + (e.title || 'page'), function () { remove(e.id); }, false, false, true));
+
+      row.appendChild(thumbs); row.appendChild(meta); row.appendChild(ctrls);
+      libBody.appendChild(row);
+    });
+  }
+  function iconBtn(label, aria, fn, disabled, wide, danger) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'icon-btn' + (danger ? ' danger' : '');
+    b.textContent = label; b.setAttribute('aria-label', aria);
+    if (wide) b.style.width = 'auto', b.style.padding = '0 10px', b.style.fontSize = '11px';
+    if (disabled) b.disabled = true, b.style.opacity = '0.4', b.style.cursor = 'not-allowed';
+    else b.addEventListener('click', fn);
+    return b;
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  // ---- Export ----
+  $('exportBtn').addEventListener('click', function () {
+    if (!library.length) { status('Nothing to export yet.'); return; }
+    var out = { schema: 'atlas-library', version: 1, generatedAt: new Date().toISOString(), entries: [] };
+    library.forEach(function (e, i) {
+      var n = String(i + 1);
+      while (n.length < 2) n = '0' + n;
+      var base = n + '-' + slug(e.title);
+      out.entries.push({
+        module: e.module || '', title: e.title || '', dok: e.dok || null,
+        notes: e.notes || '', source: e.source || '',
+        practice: exportSide(e.practice, base + '-practice'),
+        key: exportSide(e.key, base + '-key')
+      });
+    });
+    var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'atlas-library.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    status('Exported atlas-library.json. Send me that file.');
+  });
+  function exportSide(side, baseName) {
+    if (!side) return null;
+    if (side.kind === 'url' || (side.url && !side.dataUrl)) return { kind: 'url', url: side.url };
+    return { kind: 'data', filename: baseName + '.' + extFromDataUrl(side.dataUrl), dataUrl: side.dataUrl };
+  }
+
+  // ---- Import ----
+  $('importBtn').addEventListener('click', function () { $('importFile').click(); });
+  $('importFile').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      try {
+        var data = JSON.parse(ev.target.result);
+        var entries = data && data.entries ? data.entries : (Array.isArray(data) ? data : null);
+        if (!entries) { status('That file is not an Atlas library export.'); return; }
+        if (!window.confirm('Replace the current list with ' + entries.length + ' imported pages?')) return;
+        library = entries.map(function (it) {
+          return {
+            id: uid(), module: it.module || '', title: it.title || '',
+            dok: it.dok || null, notes: it.notes || '', source: it.source || '',
+            practice: normalizeSide(it.practice), key: normalizeSide(it.key)
+          };
+        });
+        render(); save(); status('Imported ' + library.length + ' pages.');
+      } catch (err) { status('Could not read that file.'); }
+    };
+    reader.readAsText(f);
+    e.target.value = '';
+  });
+  function normalizeSide(side) {
+    if (!side) return null;
+    if (side.kind === 'url' || side.url) return { kind: 'url', url: side.url };
+    if (side.dataUrl) return { kind: 'data', dataUrl: side.dataUrl };
+    return null;
+  }
+
+  // ---- Categories (modules) ----
+  var CUSTOM_KEY = 'atlas-builder-modules-v1';
+  var dataList = document.getElementById('moduleSuggestions');
+  var BUILTIN_MODULES = Array.prototype.map.call(dataList.options, function (o) { return o.value; });
+  function loadCustomModules() {
+    try { var r = localStorage.getItem(CUSTOM_KEY); var a = r ? JSON.parse(r) : []; return Array.isArray(a) ? a : []; }
+    catch (e) { return []; }
+  }
+  function saveCustomModules(a) { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(a)); } catch (e) {} }
+  function allModules() {
+    var seen = {}, out = [];
+    function add(m) { m = (m || '').trim(); if (!m) return; var k = m.toLowerCase(); if (seen[k]) return; seen[k] = 1; out.push(m); }
+    BUILTIN_MODULES.forEach(add);
+    loadCustomModules().forEach(add);
+    library.forEach(function (e) { add(e.module); });
+    return out;
+  }
+  function refreshModuleList() {
+    var mods = allModules();
+    dataList.innerHTML = '';
+    mods.forEach(function (m) { var o = document.createElement('option'); o.value = m; dataList.appendChild(o); });
+  }
+  function registerModule(name) {
+    name = (name || '').trim();
+    if (!name) return false;
+    var k = name.toLowerCase();
+    var known = allModules().some(function (m) { return m.toLowerCase() === k; });
+    if (!known) { var c = loadCustomModules(); c.push(name); saveCustomModules(c); }
+    refreshModuleList();
+    return !known;
+  }
+  document.getElementById('addCatBtn').addEventListener('click', function () {
+    var name = fModule.value.trim();
+    var st = document.getElementById('catStatus');
+    if (!name) { st.textContent = 'Type a category name first.'; return; }
+    var added = registerModule(name);
+    st.textContent = added ? ('Saved "' + name + '" as a category.') : ('"' + name + '" is already a category.');
+    setTimeout(function () { if (st.textContent.indexOf(name) !== -1) st.textContent = ''; }, 4000);
+  });
+
+  // ---- Init ----
+  setupDrop('dropPractice', 'filePractice', 'practice');
+  setupDrop('dropKey', 'fileKey', 'key');
+  load();
+  refreshModuleList();
+  render();
+})();
+
+// Iframe height-sender (in case this page is ever embedded).
+(function () {
+  if (window.parent === window) return;
+  function send() {
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({ type: 'resize', id: 'atlas-builder', height: h }, '*');
+  }
+  window.addEventListener('load', send);
+  window.addEventListener('resize', send);
+  if (window.ResizeObserver) new ResizeObserver(send).observe(document.body);
+})();
+</script>
+
+</body>
+</html>

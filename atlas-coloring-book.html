@@ -365,6 +365,20 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
 .action-btn.add-page:hover { background: #225A63; border-color: #225A63; color: #FFFFFF; }
 .bank-entry-tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; background: #EAF1F2; color: #225A63; border: 1px solid #2A6F7A; margin-left: 6px; }
 .bank-entry-actions button.danger:hover { border-color: #C0392B; color: #C0392B; }
+
+/* ===== Instructor "Atlas Builder" mode: building controls stay hidden for
+   students until the Atlas Builder button is toggled on (saved per device). ===== */
+#addPageBtn, #exportCatsBtn, #importCatsBtn, #resetCatsBtn { display: none; }
+body.builder-on #addPageBtn, body.builder-on #exportCatsBtn, body.builder-on #importCatsBtn, body.builder-on #resetCatsBtn { display: inline-block; }
+.bank-entry-cat { display: none; }
+body.builder-on .bank-entry-cat { display: flex; }
+.starter-savehint { display: none; }
+body.builder-on .starter-savehint { display: block; }
+.builder-banner { display: none; }
+body.builder-on .builder-banner { display: block; }
+.hero-actions button.builder-btn { background: transparent; color: #8B3A2E; border: 1px solid #B8924A; }
+.hero-actions button.builder-btn:hover { background: #FAF6EE; border-color: #8B3A2E; color: #8B3A2E; }
+.hero-actions button.builder-btn[aria-pressed="true"] { background: #8B3A2E; color: #FFFFFF; border-color: #8B3A2E; }
 .bank-entry-cat { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
 .bank-entry-cat > span { font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #0B1530; opacity: 0.55; white-space: nowrap; }
 .bank-entry-cat select { flex: 1 1 auto; min-width: 0; padding: 5px 8px; border: 1px solid rgba(11, 21, 48, 0.22); border-radius: 4px; font-family: inherit; font-size: 12px; color: #0B1530; background: #FFFFFF; cursor: pointer; }
@@ -399,6 +413,7 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     <button type="button" class="ghost" id="resetAll">Reset session</button>
     <button type="button" class="ghost" id="jumpStarter">Browse starter library</button>
     <button type="button" class="ghost" id="jumpBank">Jump to my book</button>
+    <button type="button" class="ghost builder-btn" id="atlasBuilderBtn" aria-pressed="false" title="Instructor tools: add pages and sort categories">Atlas Builder</button>
   </div>
 </section>
 
@@ -567,8 +582,8 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
         <button type="button" class="action-btn add-all" id="addAllStarterBtn">Add all to my book</button>
       </div>
     </header>
-    <p class="starter-intro">Built-in practice pages, grouped by category. <em>Load to canvas</em> opens a pair so you can label it, then toggle the answer key to check. <em>Add to my book</em> copies it into your own library below. Each card has a <em>Category</em> dropdown: re-file any page, or pick <em>+ New category</em> to make your own. A <em>Cadaver</em> category is built in.</p>
-    <p class="starter-savehint"><strong>Note:</strong> your category changes save on this device. To make them permanent for students, click <strong>Export sorting</strong> and send the file back so it can be baked into the published page.</p>
+    <p class="starter-intro">Built-in practice pages, grouped by category. <em>Load to canvas</em> opens a pair so you can label it, then toggle the answer key to check. <em>Add to my book</em> copies it into your own library below.</p>
+    <p class="starter-savehint"><strong>Instructor builder is on.</strong> Use <strong>+ Add a page</strong> to add a pair, the <strong>Category</strong> dropdown on any card to re-file it (Cadaver and your own categories included), then <strong>Export sorting</strong> and send the file so your additions are baked in for students. Changes here save in this browser until exported.</p>
     <div class="starter-status" id="starterStatus" role="status" aria-live="polite" hidden></div>
     <div class="bank-body" id="starterBody"></div>
   </section>
@@ -2145,7 +2160,30 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
     {"id": "preset_40_histology_23", "module": "Introduction & Histology", "title": "Histology #23", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/40-histology-23-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/40-histology-23-key.png"},
     {"id": "preset_41_histology_24", "module": "Introduction & Histology", "title": "Histology #24", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/41-histology-24-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/41-histology-24-key.png"},
     {"id": "preset_42_histology_26", "module": "Introduction & Histology", "title": "Histology #26", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/42-histology-26-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/42-histology-26-key.png"},
-    {"id": "preset_43_histology_27", "module": "Introduction & Histology", "title": "Histology #27", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/43-histology-27-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/43-histology-27-key.png"}
+    {"id": "preset_43_histology_27", "module": "Introduction & Histology", "title": "Histology #27", "dok": 1, "notes": "", "source": "BIO 004 Atlas slide bank", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/43-histology-27-practice.png", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/43-histology-27-key.png"},
+    {"id": "preset_44_compact_bone_tissue", "module": "Skeletal System", "title": "Compact Bone Tissue", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/09-compact-bone-tissue-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/09-compact-bone-tissue-key.jpg"},
+    {"id": "preset_45_long_bone", "module": "Skeletal System", "title": "Long Bone", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/10-long-bone-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/10-long-bone-key.jpg"},
+    {"id": "preset_46_hand_wrist_muscles", "module": "Muscular System", "title": "Hand/Wrist  Muscles", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/11-hand-wrist-muscles-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/11-hand-wrist-muscles-key.jpg"},
+    {"id": "preset_47_upper_arm_muscles", "module": "Muscular System", "title": "Upper Arm Muscles", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/12-upper-arm-muscles-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/12-upper-arm-muscles-key.jpg"},
+    {"id": "preset_48_forearm_muscles", "module": "Muscular System", "title": "Forearm Muscles", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/13-forearm-muscles-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/13-forearm-muscles-key.jpg"},
+    {"id": "preset_49_forearm_muscles_anterior_deep", "module": "Muscular System", "title": "Forearm Muscles (Anterior, deep)", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/14-forearm-muscles-anterior-deep-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/14-forearm-muscles-anterior-deep-key.jpg"},
+    {"id": "preset_50_neck_posterior", "module": "Muscular System", "title": "Neck (Posterior)", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/15-neck-posterior-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/15-neck-posterior-key.jpg"},
+    {"id": "preset_51_facial_expression_muscles", "module": "Muscular System", "title": "Facial Expression Muscles", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/16-facial-expression-muscles-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/16-facial-expression-muscles-key.jpg"},
+    {"id": "preset_52_gi_strutures_of_the_head_and_neck_midsagittal_head", "module": "Digestive System", "title": "GI Strutures of the head and neck (Midsagittal Head)", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/17-gi-strutures-of-the-head-and-neck-midsagittal-head-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/17-gi-strutures-of-the-head-and-neck-midsagittal-head-key.jpg"},
+    {"id": "preset_53_liver_model", "module": "Digestive System", "title": "Liver Model", "dok": null, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/18-liver-model-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/18-liver-model-key.jpg"},
+    {"id": "preset_54_mesentaries", "module": "Digestive System", "title": "Mesentaries", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/19-mesentaries-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/19-mesentaries-key.jpg"},
+    {"id": "preset_55_liver_histology_model", "module": "Digestive System", "title": "Liver Histology Model", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/20-liver-histology-model-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/20-liver-histology-model-key.jpg"},
+    {"id": "preset_56_mesentaries", "module": "Cadaver", "title": "Mesentaries", "dok": 1, "notes": "", "source": "BlueLink Anatomy", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/21-mesentaries-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/21-mesentaries-key.jpg"},
+    {"id": "preset_57_abdominal_gi_blood_vessels", "module": "Digestive System", "title": "Abdominal GI Blood Vessels", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/22-abdominal-gi-blood-vessels-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/22-abdominal-gi-blood-vessels-key.jpg"},
+    {"id": "preset_58_pancreas", "module": "Digestive System", "title": "Pancreas", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/23-pancreas-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/23-pancreas-key.jpg"},
+    {"id": "preset_59_pancreas", "module": "Cadaver", "title": "Pancreas", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/24-pancreas-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/24-pancreas-key.jpg"},
+    {"id": "preset_60_abdominal_gi_blood_vessels", "module": "Cadaver", "title": "Abdominal/GI Blood Vessels", "dok": 1, "notes": "", "source": "Blue Link Anatomy", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/25-abdominal-gi-blood-vessels-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/25-abdominal-gi-blood-vessels-key.jpg"},
+    {"id": "preset_61_gall_bladder_ducts", "module": "Cadaver", "title": "Gall Bladder & Ducts", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/26-gall-bladder-and-ducts-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/26-gall-bladder-and-ducts-key.jpg"},
+    {"id": "preset_62_gall_bladder_ducts", "module": "Digestive System", "title": "Gall Bladder & Ducts", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/27-gall-bladder-and-ducts-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/27-gall-bladder-and-ducts-key.jpg"},
+    {"id": "preset_63_gall_bladder_bv_ducts", "module": "Digestive System", "title": "Gall Bladder, BV & Ducts", "dok": 1, "notes": "", "source": "BlueLink Anatomy", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/28-gall-bladder-bv-and-ducts-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/28-gall-bladder-bv-and-ducts-key.jpg"},
+    {"id": "preset_64_gall_bladder_ducts_and_liver_model", "module": "Digestive System", "title": "Gall Bladder, ducts and liver (Model)", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/29-gall-bladder-ducts-and-liver-model-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/29-gall-bladder-ducts-and-liver-model-key.jpg"},
+    {"id": "preset_65_gall_bladder_liver_and_pancreas", "module": "Digestive System", "title": "Gall Bladder, Liver and Pancreas", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/30-gall-bladder-liver-and-pancreas-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/30-gall-bladder-liver-and-pancreas-key.jpg"},
+    {"id": "preset_66_gall_bladder_liver_and_ducts_bv", "module": "Digestive System", "title": "Gall Bladder, Liver and ducts/BV", "dok": 1, "notes": "", "source": "", "practiceURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/31-gall-bladder-liver-and-ducts-bv-practice.jpg", "keyURL": "https://drsrennie-stack.github.io/new-build-bio4-solano/31-gall-bladder-liver-and-ducts-bv-key.jpg"}
   ];
 
   var starterBody   = document.getElementById('starterBody');
@@ -2522,6 +2560,35 @@ dialog.atlas-dialog .dlg-footer button.primary:hover { background: #A0452F; colo
   }
 
   render();
+})();
+
+// Atlas Builder (instructor) mode: reveals the page-building controls.
+// State persists per device in localStorage, so once an instructor turns it on
+// it stays on for them. Students never see the building controls by default.
+(function () {
+  'use strict';
+  var KEY = 'acb-builder-mode';
+  var btn = document.getElementById('atlasBuilderBtn');
+  function isOn() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+  function apply(on) {
+    document.body.classList.toggle('builder-on', on);
+    if (btn) {
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.textContent = on ? 'Atlas Builder: On' : 'Atlas Builder';
+    }
+  }
+  apply(isOn());
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var on = !isOn();
+      try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) {}
+      apply(on);
+      if (on) {
+        var s = document.getElementById('starter');
+        if (s && s.scrollIntoView) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
 })();
 
 // Iframe height sender (Kajabi / GitHub Pages embed compatibility)
